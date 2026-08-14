@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@google/genai": "^2.15.0",
+    "ollama": "^0.6.3"
+  }
+}

@@ -1,0 +1,52 @@
+autentication - kya user whi hai jo wo claim kr rha hai.
+authorization - kya user ke pass required previlages hai.
+
+"server har kaam keliye puchega aap kon hoo" - cookies and session will solve this
+
+// Logic flow for Interview
+
+User
+
+↓
+
+Create Interview
+
+↓
+
+Interview Document Created
+
+↓
+
+AI Generates Questions
+
+↓
+
+Questions Saved
+
+↓
+
+Status = Created
+
+↓
+
+Appears in Interview List
+
+↓
+
+User clicks Start
+
+↓
+
+Status = In Progress
+
+↓
+
+Answer Questions
+
+↓
+
+Finish
+
+↓
+
+Status = Completed
