@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "@google/genai": "^2.15.0",
-    "ollama": "^0.6.3"
+    "multer": "^2.2.0",
+    "ollama": "^0.6.3",
+    "pdf-parse": "^2.4.5"
   }
 }

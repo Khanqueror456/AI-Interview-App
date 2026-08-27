@@ -10,6 +10,7 @@ import cors from "cors"
 import userRoutes from "./routes/userRoutes.js"
 import interviewRoutes from "./routes/interviewRoutes.js"
 import uploadRoutes from "./routes/uploadRoutes.js"
+import resumeRoutes from "./routes/resumeRoutes.js";
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/interviews", interviewRoutes)
 app.use("/api/speech", uploadRoutes);
+app.use("/api/resumes", resumeRoutes);
 
 app.use(errorHandler) // it should be after all routes
 
