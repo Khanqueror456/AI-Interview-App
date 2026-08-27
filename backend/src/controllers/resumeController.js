@@ -1,6 +1,7 @@
 import Resume from "../models/Resume.js";
 import asyncHandler from "../utils/asyncHandler.js";
-import { extractResumeText } from "../services/resumeService.js";
+import { extractResumeText, parseResumeWithAI } from "../services/resumeService.js";
+
 
 export const uploadResume = asyncHandler( async (req, res, next) => {
 
@@ -14,13 +15,19 @@ export const uploadResume = asyncHandler( async (req, res, next) => {
     const resumeText = await extractResumeText(req.file.path);
     console.log(resumeText);
 
+    const parsedData = await parseResumeWithAI(resumeText);
+
     const resume = await Resume.create({
         user : req.user.id,
 
         originalFile : {
             filename : req.file.originalname,
             path : req.file.path
-        }
+        },
+
+        rawText: resumeText,
+
+        parsedData
     });
 
     return res.status(201).json({

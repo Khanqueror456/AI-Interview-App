@@ -20,6 +20,11 @@ const resumeSchema = new mongoose.Schema(
             }
         },
 
+        rawText: {
+            type: String,
+            required: true
+        },
+
         parsedData: {
             personalInfo: {
                 name: String,
