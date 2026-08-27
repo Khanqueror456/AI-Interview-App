@@ -122,6 +122,33 @@ const VoiceTest = () => {
         console.log("Microphone stopped");
     }
 
+    const testTTS = async () => {
+
+        try {
+
+            const response = await api.post(
+                "/speech/synthesize",
+                {
+                    text: "What is MongoDB? How it is different from SQL and other tabular databases ?"
+                }
+            );
+
+            console.log(
+                "Generated audio:",
+                response.data.audioUrl
+            );
+
+        } catch (error) {
+
+            console.error(
+                "TTS failed:",
+                error
+            );
+        }
+    };
+
+    
+
 
 
     return (
@@ -136,6 +163,10 @@ const VoiceTest = () => {
             <button onClick={stopRecording}>
                 ⏹ Stop Recording
             </button>
+
+            <br />
+
+            <button onClick={testTTS}>Get audio</button>
 
             {audioURL && (
                 <audio

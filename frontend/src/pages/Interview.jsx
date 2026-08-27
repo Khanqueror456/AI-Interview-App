@@ -3,6 +3,7 @@ import { finishInterview, getInterview, pauseInterview, pauseInterviewOnExit, re
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { FaMicrophone, FaStop } from "react-icons/fa";
+import AudioPlayer from '../components/interview/AudioPlayer';
 
 import api from '../services/api';
 
@@ -57,12 +58,21 @@ const Interview = () => {
   }, [id])
 
   useEffect(() => {
-    console.log(interview)
+  console.log(interview?.currentQuestionsIndex);
+  if (interview?.currentQuestionsIndex >=
+    interview?.questions?.length) {
+    console.log("Calling finish handler");
+    finishInterviewHandler();
+  }
   }, [interview])
 
   useEffect(() => {
     console.log(interviewStatus)
   }, [interviewStatus]);
+
+  useEffect(() => {
+    console.log("Interview summary", interviewSummary);
+  }, [interviewSummary]);
 
   if (!interview) {
     return <div>Loading...</div>;
@@ -94,12 +104,10 @@ const Interview = () => {
     setValue("answer", "");
     const response = await skipCurrentQuestion(id);
 
-    if (interview?.currentQuestionsIndex >=
-      interview?.questions?.length - 1) {
-      await finishInterviewHandler();
-    }
-    setInterview(response);
+    // console.log(interview?.currentQuestionsIndex, interview?.questions?.length)
+    // console.log(interview);
 
+    setInterview(response);
   }
 
   const handleResume = async () => {
@@ -262,6 +270,12 @@ const Interview = () => {
 
     console.log("Microphone stopped");
   }
+
+  const getAudioUrl = (audioPath) => {
+
+    // console.log(`${import.meta.env.VITE_API_URL}${audioPath}`);
+    return `${import.meta.env.VITE_BACKEND_URL}${audioPath}`;
+  };
 
 
   if (interviewSummary) {
@@ -578,6 +592,12 @@ const Interview = () => {
 
             <div className="flex items-center justify-center gap-4">
 
+              {/* Listen Question*/}
+
+              <AudioPlayer audioUrl={getAudioUrl(interview?.questions?.[
+                interview?.currentQuestionsIndex
+              ]?.audioURL)} />
+
               {/* Start Recording */}
               <button
                 onClick={startRecording}
@@ -628,7 +648,7 @@ const Interview = () => {
                 interview?.currentQuestionsIndex >=
                 interview?.questions?.length ||
                 interviewStatus !== "in-progress" ||
-                isSubmitting
+                isSubmitting || feedback
               }
               className="rounded-lg border border-slate-600 bg-slate-800 px-5 py-3 font-medium text-slate-300 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
             >
@@ -654,7 +674,7 @@ const Interview = () => {
               disabled={
                 !(
                   interview?.currentQuestionsIndex >=
-                  interview?.questions?.length - 1
+                  interview?.questions?.length
                 )
               }
               className="rounded-lg bg-emerald-600 px-5 py-3 font-medium text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-40"

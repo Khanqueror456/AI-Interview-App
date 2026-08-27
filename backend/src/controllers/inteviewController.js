@@ -7,6 +7,7 @@ import { getDuration } from "../utils/getDuration.js"
 import { getInterviewSummary } from "../utils/getInterviewSummary.js"
 import { getPerformanceMetrics } from "../utils/getPerformanceMetrics.js"
 import { getSkillBreakdown } from "../services/aiServices.js"
+import generateQuestionAudio from "../services/ttsService.js"
 
 export const getInterview = asyncHandler(async (req, res) => {
 
@@ -62,6 +63,15 @@ export const createInterview = asyncHandler(async (req, res) => {
         });
 
         questionIds.push(question._id);
+    }
+
+    for (const qId of questionIds) {
+        const question = await Question.findById(qId);
+        const audioURL = await generateQuestionAudio(question.question);
+
+        question.audioURL = audioURL;
+
+        await question.save();
     }
 
     interview.questions = questionIds;
@@ -229,12 +239,6 @@ export const skipCurrentQuestion = asyncHandler(async (req, res) => {
         return res.status(404).json({ message: "Interview not found" });
     }
 
-    const currentQuestionsIndex = interview.currentQuestionsIndex++;
-
-
-
-    await interview.save();
-
     if (
         interview.currentQuestionsIndex >=
         interview.questions.length
@@ -243,11 +247,25 @@ export const skipCurrentQuestion = asyncHandler(async (req, res) => {
         interview.endedAt = new Date(Date.now()).toISOString();
 
         interview.save();
-        return res.status(200).json({
-            success: true,
-            interviewCompleted: true
-        })
+
+        const updatedInterview = await Interview.findOne({
+            _id: interviewId,
+        }).populate("questions");
+
+
+        return res.status(200).json(
+            updatedInterview
+        )
     }
+
+    const currentQuestionsIndex = interview.currentQuestionsIndex++;
+
+
+    await interview.save();
+
+    console.log(currentQuestionsIndex);
+
+
 
     await interview.save();
 
@@ -255,7 +273,7 @@ export const skipCurrentQuestion = asyncHandler(async (req, res) => {
         _id: interviewId,
     }).populate("questions");
 
-    console.log(updatedInterview);
+    console.log(updatedInterview.currentQuestionsIndex);
 
     return res.status(200).json(updatedInterview);
 })

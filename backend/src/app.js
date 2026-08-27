@@ -1,7 +1,8 @@
 import dotenv from "./config/env.js"
 import express from "express";
 import cookieParser from "cookie-parser"
-import bcrypt from "bcrypt"; 
+import bcrypt from "bcrypt";
+import path from "path";
 import authRoutes from "./routes/authRoutes.js"
 import errorHandler from "./middleware/errorMiddleware.js";
 import helmet from "helmet"
@@ -11,6 +12,16 @@ import interviewRoutes from "./routes/interviewRoutes.js"
 import uploadRoutes from "./routes/uploadRoutes.js"
 
 const app = express();
+
+console.log("Current working directory:", process.cwd());
+console.log(
+    "Uploads path:",
+    path.join(process.cwd(), "src", "uploads")
+);
+
+app.use("/uploads", express.static(
+    path.join(process.cwd(), "src", "uploads")
+));
 
 app.use(cors({
     origin : "http://localhost:5173",

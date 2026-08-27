@@ -30,6 +30,11 @@ const QuestionSchema = new mongoose.Schema({
     score: {
         type: Number,
         default: null
+    },
+
+    audioURL : {
+        type : String,
+        default : null
     }
 });
 
