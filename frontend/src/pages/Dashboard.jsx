@@ -76,6 +76,14 @@ const Dashboard = () => {
             + Create Interview
           </button>
 
+          <button
+            onClick={() => navigate("/resume/analyzer")}
+            className="rounded-lg bg-indigo-600 px-5 py-3 font-medium text-white transition hover:bg-indigo-500"
+          >
+            Analyse resume
+          </button>
+
+
         </div>
 
 

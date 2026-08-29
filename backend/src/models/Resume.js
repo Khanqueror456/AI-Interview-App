@@ -77,13 +77,31 @@ const resumeSchema = new mongoose.Schema(
         },
 
         analysis: {
-            score: Number,
+            score: {
+                type: Number,
+                min: 0,
+                max: 100
+            },
 
-            strengths: [String],
+            strengths: {
+                type: [String],
+                default: []
+            },
 
-            weaknesses: [String],
+            weaknesses: {
+                type: [String],
+                default: []
+            },
 
-            suggestions: [String]
+            suggestions: {
+                type: [String],
+                default: []
+            },
+
+            missingSkills: {
+                type: [String],
+                default: []
+            }
         }
     },
     {

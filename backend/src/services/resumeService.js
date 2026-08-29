@@ -108,3 +108,68 @@ ${resumeText}
 
     return parsedData;
 }
+
+
+export const analyzeResumeWithAI = async (parsedData) => {
+
+    const prompt = `
+        You are an expert technical recruiter and resume reviewer.
+
+        Analyze the candidate's resume based ONLY on the structured
+        resume data provided below.
+
+        Evaluate the resume from the perspective of:
+
+        - Technical skills
+        - Professional experience
+        - Projects
+        - Education
+        - Resume clarity
+        - Relevance to software development roles
+        - Ability to demonstrate impact
+        - ATS friendliness
+
+        Rules:
+
+        1. Do not invent information.
+        2. Do not assume skills that are not present.
+        3. Base every observation on the provided resume data.
+        4. Be constructive rather than generic.
+        5. Return ONLY valid JSON.
+        6. Do not use markdown.
+        7. Score the resume from 0 to 100.
+
+        Return exactly this structure:
+
+        {
+            "score": 0,
+            "strengths": [],
+            "weaknesses": [],
+            "suggestions": [],
+            "missingSkills": []
+        }
+
+        Resume data:
+
+        ${JSON.stringify(parsedData, null, 2)}
+        `;
+
+
+    const response = await ollama.chat({
+        model: "qwen3:8b",
+        format: "json",
+        messages: [
+            {
+                role: "user",
+                content: prompt
+            }
+        ]
+    });
+
+    const text = response.message.content;
+
+    const analysis = JSON.parse(text);
+
+    return analysis;
+
+}

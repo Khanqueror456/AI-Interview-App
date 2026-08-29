@@ -7,6 +7,8 @@ import CreateInterview from "../pages/CreateInterview";
 import Interview from "../pages/Interview";
 import Report from "../pages/Report";
 import QuestionAnalysis from "../pages/QuestionAnalysis";
+import ResumeAnalyzer from "../pages/ResumeAnalyzer";
+import ResumeReport from "../pages/ResumeReport";
 
 import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../components/layout/MainLayout";
@@ -31,6 +33,9 @@ const AppRoutes = () => {
             <Route path="/interviews/:id" element={<Interview />} />
             <Route path="/interviews/:id/report" element={<Report />} />
             <Route path="/interviews/questions/:id/analysis" element={<QuestionAnalysis />} />
+            <Route path="/resume/analyzer" element={<ResumeAnalyzer />} />
+            <Route path="/resumes/:id/report" element={<ResumeReport />}
+/>
           </Route>
         </Route>
       </Routes>
