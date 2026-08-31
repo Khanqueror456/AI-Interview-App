@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { uploadResume } from "../services/resumeService";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -10,7 +10,6 @@ const ResumeAnalyzer = () => {
     const [loading, setLoading] = useState(false);
     const [resume, setResume] = useState(null);
     const [error, setError] = useState(null);
-    const navigate = useNavigate();
 
     const handleFileChange = (e) => {
 
@@ -67,13 +66,15 @@ const ResumeAnalyzer = () => {
         const {
             personalInfo,
             summary,
-            skills,
             experience,
             projects,
             education,
             certifications,
-            links
+            links,
+            achievements
         } = resume.parsedData || {};
+
+        console.log("achievements", achievements)
 
 
         return (
@@ -162,19 +163,19 @@ const ResumeAnalyzer = () => {
                     )}
 
 
-                    {/* Skills */}
+                    {/* achievement */}
 
                     <div className="mb-6 rounded-2xl border border-slate-800 bg-slate-900 p-6">
 
                         <h2 className="mb-5 text-xl font-semibold">
-                            Skills
+                            achievement
                         </h2>
 
                         <div className="flex flex-wrap gap-3">
 
-                            {skills?.length > 0 ? (
+                            {achievements?.length > 0 ? (
 
-                                skills.map((skill, index) => (
+                                achievements.map((skill, index) => (
                                     <span
                                         key={index}
                                         className="rounded-full bg-indigo-500/10 px-4 py-2 text-sm text-indigo-300 ring-1 ring-indigo-500/20"
@@ -186,7 +187,7 @@ const ResumeAnalyzer = () => {
                             ) : (
 
                                 <p className="text-slate-500">
-                                    No skills found
+                                    No achievement found
                                 </p>
 
                             )}
@@ -244,6 +245,42 @@ const ResumeAnalyzer = () => {
                             )}
 
                         </div>
+
+                    </div>
+
+
+                    {/* Achievements */}
+
+                    <div className="mb-6 rounded-2xl border border-slate-800 bg-slate-900 p-6">
+
+                        <h2 className="mb-5 text-xl font-semibold">
+                            Achievements
+                        </h2>
+
+                        {achievements?.length > 0 ? (
+
+                            <div className="flex flex-wrap gap-3">
+
+                                {achievements.map((achievement, index) => (
+
+                                    <span
+                                        key={index}
+                                        className="rounded-lg bg-indigo-500/10 px-4 py-2 text-sm font-medium text-indigo-300 ring-1 ring-indigo-500/20"
+                                    >
+                                        {achievement}
+                                    </span>
+
+                                ))}
+
+                            </div>
+
+                        ) : (
+
+                            <p className="text-sm text-slate-500">
+                                No achievement found
+                            </p>
+
+                        )}
 
                     </div>
 

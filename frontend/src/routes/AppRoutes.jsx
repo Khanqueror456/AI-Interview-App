@@ -9,9 +9,11 @@ import Report from "../pages/Report";
 import QuestionAnalysis from "../pages/QuestionAnalysis";
 import ResumeAnalyzer from "../pages/ResumeAnalyzer";
 import ResumeReport from "../pages/ResumeReport";
+import Resumes from "../pages/Resumes";
 
 import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../components/layout/MainLayout";
+import ResumeDetails from "../pages/ResumeDetails";
 
 
 const AppRoutes = () => {
@@ -34,8 +36,9 @@ const AppRoutes = () => {
             <Route path="/interviews/:id/report" element={<Report />} />
             <Route path="/interviews/questions/:id/analysis" element={<QuestionAnalysis />} />
             <Route path="/resume/analyzer" element={<ResumeAnalyzer />} />
-            <Route path="/resumes/:id/report" element={<ResumeReport />}
-/>
+            <Route path="/resumes/:id/report" element={<ResumeReport />} />
+            <Route path="/resumes" element={<Resumes />} />
+            <Route path="/resumes/:id" element={<ResumeDetails />} />
           </Route>
         </Route>
       </Routes>

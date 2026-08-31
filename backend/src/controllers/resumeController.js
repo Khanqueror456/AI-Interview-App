@@ -3,12 +3,12 @@ import asyncHandler from "../utils/asyncHandler.js";
 import { analyzeResumeWithAI, extractResumeText, parseResumeWithAI } from "../services/resumeService.js";
 
 
-export const uploadResume = asyncHandler( async (req, res, next) => {
+export const uploadResume = asyncHandler(async (req, res) => {
 
-    if (!req.file){
+    if (!req.file) {
         return res.status(400).json({
-            success : false,
-            message : "Resume file is required"
+            success: false,
+            message: "Resume file is required"
         });
     }
 
@@ -20,11 +20,11 @@ export const uploadResume = asyncHandler( async (req, res, next) => {
     const analysis = await analyzeResumeWithAI(parsedData);
 
     const resume = await Resume.create({
-        user : req.user.id,
+        user: req.user.id,
 
-        originalFile : {
-            filename : req.file.originalname,
-            path : req.file.path
+        originalFile: {
+            filename: req.file.originalname,
+            path: req.file.path
         },
 
         rawText: resumeText,
@@ -35,31 +35,60 @@ export const uploadResume = asyncHandler( async (req, res, next) => {
     });
 
     return res.status(201).json({
-        success : true,
-        message : "Resume uploaded successfully",
+        success: true,
+        message: "Resume uploaded successfully",
         resume
     });
 });
 
 
-export const getResume = asyncHandler(async (req, res, next) => {
+export const getResume = asyncHandler(async (req, res) => {
 
     const resume = await Resume.findOne({
-        _id : req.params.id,
-        user : req.user._id
+        _id: req.params.id,
+        user: req.user._id
     });
 
 
-    if (!resume)
-    {
+    if (!resume) {
         return res.status(404).json({
-            success : false,
-            message : "Resume not found"
+            success: false,
+            message: "Resume not found"
         });
     }
 
     return res.status(200).json({
-        success : true,
+        success: true,
         resume
     });
+})
+
+export const getResumes = asyncHandler(async (req, res) => {
+
+    const userId = req.user.id;
+
+    const resumes = await Resume.find(
+        { user: userId }
+    ).sort({ createdAt: -1 });
+
+    if (!resumes) {
+        return res.status(404).json({ message: "Resumes not found" });
+    }
+
+    console.log(resumes);
+
+    return res.status(200).json(resumes);
+})
+
+export const deleteResume = asyncHandler(async (req, res) => {
+
+    const userId = req.user.id;
+    const resumeId = req.params.id;
+
+    const resume = await Resume.findOneAndDelete({
+        _id: req.params.id,
+        user: req.user._id
+    });
+
+    res.status(200).json({message : "Resume deleted successfully", resume});
 })

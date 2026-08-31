@@ -67,6 +67,8 @@ const resumeSchema = new mongoose.Schema(
 
             skills: [String],
 
+            achievements : [String],
+
             certifications: [String],
 
             links: {

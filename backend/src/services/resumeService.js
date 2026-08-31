@@ -77,6 +77,8 @@ JSON structure:
 
     "skills": [],
 
+    "achievements": [],
+
     "certifications": [],
 
     "links": {
@@ -125,7 +127,7 @@ export const analyzeResumeWithAI = async (parsedData) => {
         - Projects
         - Education
         - Resume clarity
-        - Relevance to software development roles
+        - Relevance to software development roles mentioned in the resume
         - Ability to demonstrate impact
         - ATS friendliness
 

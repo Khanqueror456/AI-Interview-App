@@ -20,3 +20,20 @@ export const getResume = async(id) => {
 
     return response.data;
 }
+
+export const getResumes = async () => {
+
+    const response = await api.get("/resumes");
+
+    console.log("response data", response.data);
+
+    return response.data;
+};
+
+
+export const deleteResume = async (id) => {
+
+    const response = await api.delete(`/resumes/${id}`);
+
+    return response.data;
+};
