@@ -1,6 +1,8 @@
 import Resume from "../models/Resume.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { analyzeResumeWithAI, extractResumeText, parseResumeWithAI } from "../services/resumeService.js";
+import normalizeResume from "../services/resumeNormalizationService.js";
+import extractCandidateFeatures from "../services/candidateFeatureService.js";
 
 
 export const uploadResume = asyncHandler(async (req, res) => {
@@ -16,6 +18,13 @@ export const uploadResume = asyncHandler(async (req, res) => {
     console.log(resumeText);
 
     const parsedData = await parseResumeWithAI(resumeText);
+
+    const normalizedResume = normalizeResume(parsedData);
+
+    const candidateFeatures =
+    extractCandidateFeatures(normalizedResume);
+
+    console.log(candidateFeatures);
 
     const analysis = await analyzeResumeWithAI(parsedData);
 
@@ -90,5 +99,5 @@ export const deleteResume = asyncHandler(async (req, res) => {
         user: req.user._id
     });
 
-    res.status(200).json({message : "Resume deleted successfully", resume});
+    res.status(200).json({ message: "Resume deleted successfully", resume });
 })

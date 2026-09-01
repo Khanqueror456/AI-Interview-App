@@ -5,9 +5,11 @@ const PORT = 3000;
 
 const startServer = async () => {
     await connectDB();
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
         console.log(`Server is running on PORT ${PORT}`)
-    })
+    });
+
+    server.timeout = 1200000;
 }
 
 startServer();
