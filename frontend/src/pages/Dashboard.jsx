@@ -68,7 +68,7 @@ const Dashboard = () => {
               Manage and practice your AI interviews.
             </p>
           </div>
-
+          <div className='flex justify-center items-center gap-4'>
           <button
             onClick={() => navigate("/interviews/create")}
             className="rounded-lg bg-indigo-600 px-5 py-3 font-medium text-white transition hover:bg-indigo-500"
@@ -82,6 +82,15 @@ const Dashboard = () => {
           >
             Analyse resume
           </button>
+
+          <button
+            onClick={() => navigate("/resumes")}
+            className="rounded-lg bg-indigo-600 px-5 py-3 font-medium text-white transition hover:bg-indigo-500"
+          >
+            My resumes
+          </button>
+
+          </div>
 
 
         </div>
