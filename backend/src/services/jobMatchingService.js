@@ -37,6 +37,8 @@ IMPORTANT RULES:
     particular job.
 17. overallRelevance represents the candidate's overall suitability
     across ALL provided jobs.
+18. Generate JSON strictly as given
+19. Any deviation from the given JSON structure will counted as failed result
 
 CANDIDATE:
 
@@ -51,9 +53,13 @@ ${JSON.stringify(jobFeatures, null, 2)}
 Return exactly this JSON structure:
 
 {
-    "jobs": [
+    "overallRelevance": 0,
+
+    "jobMatches": [
         {
-            "externalId": "",
+            "jobId": "",
+
+            jobTitle : "",
 
             "overallScore": 0,
 
@@ -78,10 +84,6 @@ Return exactly this JSON structure:
         }
     ],
 
-    "overallRelevance": {
-        "score": 0,
-        "summary": ""
-    }
 }
 `;
 

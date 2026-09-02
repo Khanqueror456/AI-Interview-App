@@ -337,229 +337,238 @@ const Resumes = () => {
 
                 ) : (
 
-                            <div className="grid gap-6 md:grid-cols-2">
+                    <div className="grid gap-6 md:grid-cols-2">
 
 
-                                {filteredResumes?.map((resume) => {
+                        {filteredResumes?.map((resume) => {
 
-                                    const parsedData = resume.parsedData || {};
-                                    const analysis = resume.analysis || {};
+                            const parsedData = resume.parsedData || {};
+                            const analysis = resume.analysis || {};
 
-                                    const personalInfo =
-                                        parsedData.personalInfo || {};
+                            const personalInfo =
+                                parsedData.personalInfo || {};
 
-                                    const skills =
-                                        parsedData.skills || [];
-
-
-                                    return (
-
-                                        <div
-                                            key={resume._id}
-                                            className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition hover:border-slate-700"
-                                        >
+                            const skills =
+                                parsedData.skills || [];
 
 
-                                            {/* Resume header */}
+                            return (
 
-                                            <div className="flex items-start justify-between gap-4">
-
-                                                <div className="flex items-center gap-4">
-
-                                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/10 text-2xl">
-                                                        📄
-                                                    </div>
+                                <div
+                                    key={resume._id}
+                                    className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition hover:border-slate-700"
+                                >
 
 
-                                                    <div>
+                                    {/* Resume header */}
 
-                                                        <h2 className="font-semibold">
+                                    <div className="flex items-start justify-between gap-4">
 
-                                                            {resume.originalFile?.filename ||
-                                                                "Resume"}
+                                        <div className="flex items-center gap-4">
 
-                                                        </h2>
-
-                                                        <p className="mt-1 text-sm text-slate-500">
-
-                                                            {resume.createdAt
-                                                                ? new Date(
-                                                                    resume.createdAt
-                                                                ).toLocaleDateString()
-                                                                : "Unknown date"}
-
-                                                        </p>
-
-                                                    </div>
-
-                                                </div>
-
-
-                                                {/* Delete */}
-
-                                                <button
-                                                    onClick={() =>
-                                                        handleDelete(resume._id)
-                                                    }
-                                                    disabled={
-                                                        deletingId === resume._id
-                                                    }
-                                                    className="rounded-lg px-3 py-2 text-sm text-red-400 transition hover:bg-red-500/10 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-40"
-                                                >
-
-                                                    {deletingId === resume._id
-                                                        ? "Deleting..."
-                                                        : "Delete"}
-
-                                                </button>
-
+                                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/10 text-2xl">
+                                                📄
                                             </div>
 
 
-                                            {/* Score */}
+                                            <div>
 
-                                            <div className="mt-6 flex items-center justify-between rounded-xl bg-slate-950 p-4">
+                                                <h2 className="font-semibold">
 
-                                                <div>
+                                                    {resume.originalFile?.filename ||
+                                                        "Resume"}
 
-                                                    <p className="text-sm text-slate-400">
-                                                        Resume Score
-                                                    </p>
+                                                </h2>
 
-                                                    <p className="mt-1 text-2xl font-bold text-indigo-400">
+                                                <p className="mt-1 text-sm text-slate-500">
 
-                                                        {analysis.score ?? "—"}
+                                                    {resume.createdAt
+                                                        ? new Date(
+                                                            resume.createdAt
+                                                        ).toLocaleDateString()
+                                                        : "Unknown date"}
 
-                                                        {analysis.score != null && (
-                                                            <span className="text-sm text-slate-500">
-                                                                /100
-                                                            </span>
-                                                        )}
-
-                                                    </p>
-
-                                                </div>
-
-
-                                                <div className="text-right">
-
-                                                    <p className="text-sm text-slate-400">
-                                                        Skills
-                                                    </p>
-
-                                                    <p className="mt-1 font-semibold">
-                                                        {skills.length}
-                                                    </p>
-
-                                                </div>
-
-                                            </div>
-
-
-                                            {/* Candidate */}
-
-                                            <div className="mt-5">
-
-                                                <p className="text-sm text-slate-400">
-                                                    Candidate
                                                 </p>
-
-                                                <p className="mt-1 font-medium">
-                                                    {personalInfo.name || "Unknown"}
-                                                </p>
-
-                                            </div>
-
-
-                                            {/* Skills */}
-
-                                            <div className="mt-5">
-
-                                                <p className="mb-2 text-sm text-slate-400">
-                                                    Skills
-                                                </p>
-
-                                                <div className="flex flex-wrap gap-2">
-
-                                                    {skills.length > 0 ? (
-
-                                                        skills
-                                                            .slice(0, 6)
-                                                            .map((skill, index) => (
-
-                                                                <span
-                                                                    key={index}
-                                                                    className="rounded-md bg-slate-800 px-2.5 py-1 text-xs text-slate-300"
-                                                                >
-                                                                    {skill}
-                                                                </span>
-
-                                                            ))
-
-                                                    ) : (
-
-                                                        <span className="text-sm text-slate-500">
-                                                            No skills found
-                                                        </span>
-
-                                                    )}
-
-
-                                                    {skills.length > 6 && (
-
-                                                        <span className="rounded-md bg-slate-800 px-2.5 py-1 text-xs text-slate-500">
-
-                                                            +{skills.length - 6}
-
-                                                        </span>
-
-                                                    )}
-
-                                                </div>
-
-                                            </div>
-
-
-                                            {/* Actions */}
-
-                                            <div className="mt-6 flex gap-3 border-t border-slate-800 pt-5">
-
-                                                <button
-                                                    onClick={() =>
-                                                        navigate(
-                                                            `/resumes/${resume._id}/report`
-                                                        )
-                                                    }
-                                                    className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium transition hover:bg-indigo-500"
-                                                >
-                                                    View Report
-                                                </button>
-
-
-                                                <button
-                                                    onClick={() =>
-                                                        navigate(
-                                                            `/resumes/${resume._id}`
-                                                        )
-                                                    }
-                                                    className="flex-1 rounded-lg border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-800"
-                                                >
-                                                    View Details
-                                                </button>
 
                                             </div>
 
                                         </div>
 
-                                    );
 
-                                })}
+                                        {/* Delete */}
 
-                            </div>
+                                        <button
+                                            onClick={() =>
+                                                handleDelete(resume._id)
+                                            }
+                                            disabled={
+                                                deletingId === resume._id
+                                            }
+                                            className="rounded-lg px-3 py-2 text-sm text-red-400 transition hover:bg-red-500/10 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-40"
+                                        >
 
-                        
+                                            {deletingId === resume._id
+                                                ? "Deleting..."
+                                                : "Delete"}
 
-                    
+                                        </button>
+
+                                    </div>
+
+
+                                    {/* Score */}
+
+                                    <div className="mt-6 flex items-center justify-between rounded-xl bg-slate-950 p-4">
+
+                                        <div>
+
+                                            <p className="text-sm text-slate-400">
+                                                Resume Score
+                                            </p>
+
+                                            <p className="mt-1 text-2xl font-bold text-indigo-400">
+
+                                                {analysis.score ?? "—"}
+
+                                                {analysis.score != null && (
+                                                    <span className="text-sm text-slate-500">
+                                                        /100
+                                                    </span>
+                                                )}
+
+                                            </p>
+
+                                        </div>
+
+
+                                        <div className="text-right">
+
+                                            <p className="text-sm text-slate-400">
+                                                Skills
+                                            </p>
+
+                                            <p className="mt-1 font-semibold">
+                                                {skills.length}
+                                            </p>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    {/* Candidate */}
+
+                                    <div className="mt-5">
+
+                                        <p className="text-sm text-slate-400">
+                                            Candidate
+                                        </p>
+
+                                        <p className="mt-1 font-medium">
+                                            {personalInfo.name || "Unknown"}
+                                        </p>
+
+                                    </div>
+
+
+                                    {/* Skills */}
+
+                                    <div className="mt-5">
+
+                                        <p className="mb-2 text-sm text-slate-400">
+                                            Skills
+                                        </p>
+
+                                        <div className="flex flex-wrap gap-2">
+
+                                            {skills.length > 0 ? (
+
+                                                skills
+                                                    .slice(0, 6)
+                                                    .map((skill, index) => (
+
+                                                        <span
+                                                            key={index}
+                                                            className="rounded-md bg-slate-800 px-2.5 py-1 text-xs text-slate-300"
+                                                        >
+                                                            {skill}
+                                                        </span>
+
+                                                    ))
+
+                                            ) : (
+
+                                                <span className="text-sm text-slate-500">
+                                                    No skills found
+                                                </span>
+
+                                            )}
+
+
+                                            {skills.length > 6 && (
+
+                                                <span className="rounded-md bg-slate-800 px-2.5 py-1 text-xs text-slate-500">
+
+                                                    +{skills.length - 6}
+
+                                                </span>
+
+                                            )}
+
+                                        </div>
+
+                                    </div>
+
+
+                                    {/* Actions */}
+
+                                    <div className="mt-6 flex gap-3 border-t border-slate-800 pt-5">
+
+                                        <button
+                                            onClick={() =>
+                                                navigate(
+                                                    `/resumes/${resume._id}/report`
+                                                )
+                                            }
+                                            className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium transition hover:bg-indigo-500"
+                                        >
+                                            View Report
+                                        </button>
+
+
+                                        <button
+                                            onClick={() =>
+                                                navigate(
+                                                    `/resumes/${resume._id}`
+                                                )
+                                            }
+                                            className="flex-1 rounded-lg border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-800"
+                                        >
+                                            View Details
+                                        </button>
+
+                                        <button
+                                            onClick={() =>
+                                                navigate(`/resumes/job-search/${resume._id}`)
+                                            }
+                                            className="flex-1 rounded-lg border border-indigo-500/40 bg-indigo-500/10 px-4 py-2.5 text-sm font-medium text-indigo-300 transition hover:border-indigo-400/60 hover:bg-indigo-500/20 hover:text-indigo-200"
+                                        >
+                                            Search Jobs
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+                            );
+
+                        })}
+
+                    </div>
+
+
+
+
 
                 )}
 

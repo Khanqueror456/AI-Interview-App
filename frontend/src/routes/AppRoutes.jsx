@@ -10,10 +10,12 @@ import QuestionAnalysis from "../pages/QuestionAnalysis";
 import ResumeAnalyzer from "../pages/ResumeAnalyzer";
 import ResumeReport from "../pages/ResumeReport";
 import Resumes from "../pages/Resumes";
+import ResumeDetails from "../pages/ResumeDetails";
+import JobMatchs from "../pages/JobMatchs";
+import JobSearch from "../pages/JobSearch";
 
 import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../components/layout/MainLayout";
-import ResumeDetails from "../pages/ResumeDetails";
 
 
 const AppRoutes = () => {
@@ -39,6 +41,8 @@ const AppRoutes = () => {
             <Route path="/resumes/:id/report" element={<ResumeReport />} />
             <Route path="/resumes" element={<Resumes />} />
             <Route path="/resumes/:id" element={<ResumeDetails />} />
+            <Route path="/resumes/job-search/:id" element={<JobSearch />} />
+            <Route path="/resumes/job-matches/:id" element={<JobMatchs />} />
           </Route>
         </Route>
       </Routes>

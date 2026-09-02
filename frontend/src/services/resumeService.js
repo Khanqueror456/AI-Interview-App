@@ -37,3 +37,17 @@ export const deleteResume = async (id) => {
 
     return response.data;
 };
+
+export const getJobMatches = async(id) => {
+
+    const response = await api.get(`resumes/get-job-matches/${id}`);
+    console.log(response.data);
+    return response.data;
+}
+
+export const searchJobs = async(id, data) => {
+
+    const response = await api.post(`resumes/job-matches/${id}`, data);
+
+    return response.data;
+}
