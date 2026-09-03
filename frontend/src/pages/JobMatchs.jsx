@@ -12,12 +12,13 @@ const JobMatchs = () => {
   useEffect(() => {
     const fetchMatches = async () => {
       try {
+        console.log("Calling getJobMatches");
         const response = await getJobMatches(jobMatchesId);
         setMatchingResult(response);
       } catch (error) {
         setError(
           error?.response?.data?.message ||
-            "Failed to load job matches"
+          "Failed to load job matches"
         );
       } finally {
         setLoading(false);
@@ -194,8 +195,8 @@ const JobMatchs = () => {
                     {overallRelevance >= 80
                       ? "Excellent profile match"
                       : overallRelevance >= 60
-                      ? "Good profile match"
-                      : "Needs improvement"}
+                        ? "Good profile match"
+                        : "Needs improvement"}
                   </p>
 
                   <p className="mt-1 text-sm leading-5 text-slate-400">
@@ -259,10 +260,10 @@ const JobMatchs = () => {
               <p className="mt-3 text-3xl font-bold text-indigo-400">
                 {jobMatches.length
                   ? Math.max(
-                      ...jobMatches.map(
-                        (job) => job.overallScore
-                      )
+                    ...jobMatches.map(
+                      (job) => job.overallScore
                     )
+                  )
                   : 0}
                 %
               </p>
@@ -281,12 +282,12 @@ const JobMatchs = () => {
               <p className="mt-3 text-3xl font-bold">
                 {jobMatches.length
                   ? Math.round(
-                      jobMatches.reduce(
-                        (sum, job) =>
-                          sum + job.overallScore,
-                        0
-                      ) / jobMatches.length
-                    )
+                    jobMatches.reduce(
+                      (sum, job) =>
+                        sum + job.overallScore,
+                      0
+                    ) / jobMatches.length
+                  )
                   : 0}
                 %
               </p>
@@ -374,8 +375,8 @@ const JobMatchCard = ({ job, rank }) => {
     score >= 80
       ? "emerald"
       : score >= 60
-      ? "yellow"
-      : "red";
+        ? "yellow"
+        : "red";
 
 
   return (
@@ -432,13 +433,12 @@ const JobMatchCard = ({ job, rank }) => {
             </p>
 
             <p
-              className={`mt-1 text-3xl font-bold ${
-                scoreColor === "emerald"
+              className={`mt-1 text-3xl font-bold ${scoreColor === "emerald"
                   ? "text-emerald-400"
                   : scoreColor === "yellow"
-                  ? "text-yellow-400"
-                  : "text-red-400"
-              }`}
+                    ? "text-yellow-400"
+                    : "text-red-400"
+                }`}
             >
               {score}%
             </p>
@@ -455,13 +455,12 @@ const JobMatchCard = ({ job, rank }) => {
           <div className="h-2 overflow-hidden rounded-full bg-slate-800">
 
             <div
-              className={`h-full rounded-full transition-all ${
-                scoreColor === "emerald"
+              className={`h-full rounded-full transition-all ${scoreColor === "emerald"
                   ? "bg-emerald-500"
                   : scoreColor === "yellow"
-                  ? "bg-yellow-500"
-                  : "bg-red-500"
-              }`}
+                    ? "bg-yellow-500"
+                    : "bg-red-500"
+                }`}
               style={{
                 width: `${score}%`
               }}
@@ -603,6 +602,20 @@ const JobMatchCard = ({ job, rank }) => {
             </div>
           )}
 
+          {/* Job application URL */}
+
+          <div>
+            <a
+              href={job.applyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-500"
+            >
+              Apply Now
+              <span>↗</span>
+            </a>
+          </div>
+
         </div>
 
       </div>
@@ -630,13 +643,12 @@ const ScoreBox = ({ title, score = 0 }) => {
         </p>
 
         <p
-          className={`text-lg font-bold ${
-            percentage >= 80
+          className={`text-lg font-bold ${percentage >= 80
               ? "text-emerald-400"
               : percentage >= 60
-              ? "text-yellow-400"
-              : "text-red-400"
-          }`}
+                ? "text-yellow-400"
+                : "text-red-400"
+            }`}
         >
           {percentage}%
         </p>
@@ -646,13 +658,12 @@ const ScoreBox = ({ title, score = 0 }) => {
       <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-700">
 
         <div
-          className={`h-full rounded-full ${
-            percentage >= 80
+          className={`h-full rounded-full ${percentage >= 80
               ? "bg-emerald-500"
               : percentage >= 60
-              ? "bg-yellow-500"
-              : "bg-red-500"
-          }`}
+                ? "bg-yellow-500"
+                : "bg-red-500"
+            }`}
           style={{
             width: `${percentage}%`
           }}
@@ -679,19 +690,17 @@ const SkillSection = ({ title, skills = [], type }) => {
       <div className="mb-3 flex items-center gap-2">
 
         <span
-          className={`h-2 w-2 rounded-full ${
-            isMatched
+          className={`h-2 w-2 rounded-full ${isMatched
               ? "bg-emerald-400"
               : "bg-red-400"
-          }`}
+            }`}
         />
 
         <h4
-          className={`text-sm font-medium ${
-            isMatched
+          className={`text-sm font-medium ${isMatched
               ? "text-emerald-400"
               : "text-red-400"
-          }`}
+            }`}
         >
           {title}
         </h4>
@@ -707,11 +716,10 @@ const SkillSection = ({ title, skills = [], type }) => {
 
             <span
               key={`${skill}-${index}`}
-              className={`rounded-lg border px-3 py-1.5 text-xs font-medium ${
-                isMatched
+              className={`rounded-lg border px-3 py-1.5 text-xs font-medium ${isMatched
                   ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
                   : "border-red-500/20 bg-red-500/10 text-red-400"
-              }`}
+                }`}
             >
               {skill}
             </span>

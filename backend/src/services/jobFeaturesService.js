@@ -1,83 +1,115 @@
-import ollama from "ollama";
+// import ollama from "ollama";
 
 
-const extractJobFeatures = async (job) => {
+// const extractJobFeatures = async (job) => {
 
-    const prompt = `
-You are a job description parser.
+//     const prompt = `
+// You are a job description parser.
 
-Extract structured information from the following job posting.
+// Extract structured information from the following job posting.
 
-Return ONLY valid JSON.
-Do not include markdown.
-Do not include explanations.
+// Return ONLY valid JSON.
+// Do not include markdown.
+// Do not include explanations.
 
-Required JSON format:
+// Required JSON format:
 
-{
-    "role": "",
-    "skills": [],
-    "experienceYearsMin": null,
-    "experienceYearsMax": null,
-    "employmentType": "",
-    "location": "",
-    "education": [],
-    "description": ""
-}
+// {
+//     "role": "",
+//     "skills": [],
+//     "experienceYearsMin": null,
+//     "experienceYearsMax": null,
+//     "employmentType": "",
+//     "location": "",
+//     "education": [],
+//     "description": "",
+//     "applyUrl" : "",
+// }
 
-Job Title:
-${job.title}
+// Job Title:
+// ${job.title}
 
-Company:
-${job.company}
+// Company:
+// ${job.company}
 
-Location:
-${job.location}
+// Location:
+// ${job.location}
 
-Description:
-${job.description}
-`;
-
-
-    try {
-
-        const response = await ollama.chat({
-        model: "qwen3:8b",
-        format: "json",
-        messages: [
-            {
-                role: "user",
-                content: prompt
-            }
-        ]
-    })
+// Description:
+// ${job.description}
+// `;
 
 
-        const result = JSON.parse(
-            response.message.content
-        );
+//     try {
+
+//         const response = await ollama.chat({
+//         model: "qwen3:8b",
+//         format: "json",
+//         messages: [
+//             {
+//                 role: "user",
+//                 content: prompt
+//             }
+//         ]
+//     })
 
 
-        return {
-            ...result,
+//         const result = JSON.parse(
+//             response.message.content
+//         );
 
-            externalId: job.externalId,
-            company: job.company,
-            applyUrl: job.applyUrl,
-            source: job.source
-        };
 
-    } catch (error) {
+//         return {
+//             ...result,
 
-        console.error(
-            "Job feature extraction error:",
-            error.response?.data || error.message
-        );
+//             externalId: job.externalId,
+//             company: job.company,
+//             applyUrl: job.applyUrl,
+//             source: job.source
+//         };
 
-        throw new Error(
-            "Failed to extract job features"
-        );
-    }
+//     } catch (error) {
+
+//         console.error(
+//             "Job feature extraction error:",
+//             error.response?.data || error.message
+//         );
+
+//         throw new Error(
+//             "Failed to extract job features"
+//         );
+//     }
+// };
+
+
+// export default extractJobFeatures;
+
+const extractJobFeatures = (job) => {
+    return {
+        jobId: job.externalId,
+
+        role: job.title,
+
+        skills: [],
+
+        experienceYearsMin: null,
+
+        experienceYearsMax: null,
+
+        employmentType: job.employmentType,
+
+        location: job.location,
+
+        education: [],
+
+        description: job.description,
+
+        company: job.company,
+
+        applyUrl: job.applyUrl,
+
+        source: job.source
+    };
 };
 
 

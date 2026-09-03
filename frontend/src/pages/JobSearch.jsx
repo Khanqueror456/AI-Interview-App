@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { searchJobs } from "../services/resumeService";
+import { getJobMatches, searchJobs } from "../services/resumeService";
 
 const JobSearch = () => {
 

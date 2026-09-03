@@ -13,6 +13,7 @@ import Resumes from "../pages/Resumes";
 import ResumeDetails from "../pages/ResumeDetails";
 import JobMatchs from "../pages/JobMatchs";
 import JobSearch from "../pages/JobSearch";
+import JobMatchList from "../pages/JobMatchList";
 
 import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../components/layout/MainLayout";
@@ -43,6 +44,7 @@ const AppRoutes = () => {
             <Route path="/resumes/:id" element={<ResumeDetails />} />
             <Route path="/resumes/job-search/:id" element={<JobSearch />} />
             <Route path="/resumes/job-matches/:id" element={<JobMatchs />} />
+            <Route path="/resumes/jobs-matches/:id" element={<JobMatchList />} />
           </Route>
         </Route>
       </Routes>

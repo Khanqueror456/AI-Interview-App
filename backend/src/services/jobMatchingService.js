@@ -1,108 +1,235 @@
-import ollama from "ollama"
+import ollama from "ollama";
 
 const calculateJobMatch = async (candidateFeatures, jobFeatures) => {
 
-    const prompt = `
-You are an AI job matching engine.
+    // Give each job a temporary index that the LLM can use
+    const jobsForLLM = jobFeatures.map((job, index) => ({
+        jobIndex: index,
+        title: job.title,
+        description: job.description,
+        skills: job.skills,
+        experienceRequired: job.experienceRequired
+    }));
 
-Your task is to compare a candidate profile against MULTIPLE job
-descriptions and determine how suitable the candidate is for EACH job.
+    const prompt = `You are an AI job matching engine.
 
-IMPORTANT RULES:
+Compare the candidate profile against every provided job.
+
+Rules:
 
 1. Understand semantic similarity.
 2. Treat abbreviations and their full forms as equivalent when appropriate.
-
-   Examples:
-   - NAT = Network Address Translation
-   - ACL = Access Control List
-   - PAT = Port Address Translation
-
 3. Do not require exact string matches.
 4. Consider related roles as partial matches.
-5. Consider the candidate's actual experience against the job requirement.
-6. Missing skills should only contain skills that are genuinely relevant
-   to the job and absent from the candidate.
+5. Consider the candidate's actual experience against the job requirements.
+6. Missing skills must be genuinely relevant to the job and absent from the candidate.
 7. Do not give a high score simply because the job title is similar.
-8. Give a lower score when important required skills are missing.
-9. Consider the job description in addition to the structured job skills.
-10. Scores must be integers from 0 to 100.
-11. Return ONLY valid JSON.
-12. Do not use markdown.
-13. Return exactly ONE result for EACH job.
-14. Do not skip any job.
-15. Preserve the externalId of each job so the result can be associated
-    with the original job.
-16. overallScore represents how suitable the candidate is for that
-    particular job.
-17. overallRelevance represents the candidate's overall suitability
-    across ALL provided jobs.
-18. Generate JSON strictly as given
-19. Any deviation from the given JSON structure will counted as failed result
+8. Lower the score when important required skills are missing.
+9. Consider both the structured job skills and the full job description.
+10. All scores must be integers from 0 to 100.
+11. Generate exactly one jobMatches entry for every provided job.
+12. Do not skip any job.
+13. Use the exact jobIndex provided for each job.
+14. Never create, modify, or invent a jobIndex.
+15. Do not invent candidate experience or skills.
+16. overallScore represents suitability for that particular job.
+17. overallRelevance represents the candidate's overall suitability across all jobs.
 
 CANDIDATE:
 
 ${JSON.stringify(candidateFeatures, null, 2)}
 
-
 JOBS:
 
-${JSON.stringify(jobFeatures, null, 2)}
-
-
-Return exactly this JSON structure:
-
-{
-    "overallRelevance": 0,
-
-    "jobMatches": [
-        {
-            "jobId": "",
-
-            jobTitle : "",
-
-            "overallScore": 0,
-
-            "skillMatch": {
-                "score": 0,
-                "matched": [],
-                "missing": [],
-                "reason": ""
-            },
-
-            "roleMatch": {
-                "score": 0,
-                "reason": ""
-            },
-
-            "experienceMatch": {
-                "score": 0,
-                "reason": ""
-            },
-
-            "summary": ""
-        }
-    ],
-
-}
+${JSON.stringify(jobsForLLM, null, 2)}
 `;
+
+    const jobMatchSchema = {
+        type: "object",
+
+        properties: {
+            overallRelevance: {
+                type: "integer",
+                minimum: 0,
+                maximum: 100
+            },
+
+            jobMatches: {
+                type: "array",
+
+                items: {
+                    type: "object",
+
+                    properties: {
+
+                        jobIndex: {
+                            type: "integer",
+                            minimum: 0
+                        },
+
+                        overallScore: {
+                            type: "integer",
+                            minimum: 0,
+                            maximum: 100
+                        },
+
+                        skillMatch: {
+                            type: "object",
+
+                            properties: {
+                                score: {
+                                    type: "integer",
+                                    minimum: 0,
+                                    maximum: 100
+                                },
+
+                                matched: {
+                                    type: "array",
+                                    items: {
+                                        type: "string"
+                                    }
+                                },
+
+                                missing: {
+                                    type: "array",
+                                    items: {
+                                        type: "string"
+                                    }
+                                },
+
+                                reason: {
+                                    type: "string"
+                                }
+                            },
+
+                            required: [
+                                "score",
+                                "matched",
+                                "missing",
+                                "reason"
+                            ]
+                        },
+
+                        roleMatch: {
+                            type: "object",
+
+                            properties: {
+                                score: {
+                                    type: "integer",
+                                    minimum: 0,
+                                    maximum: 100
+                                },
+
+                                reason: {
+                                    type: "string"
+                                }
+                            },
+
+                            required: [
+                                "score",
+                                "reason"
+                            ]
+                        },
+
+                        experienceMatch: {
+                            type: "object",
+
+                            properties: {
+                                score: {
+                                    type: "integer",
+                                    minimum: 0,
+                                    maximum: 100
+                                },
+
+                                reason: {
+                                    type: "string"
+                                }
+                            },
+
+                            required: [
+                                "score",
+                                "reason"
+                            ]
+                        },
+
+                        summary: {
+                            type: "string"
+                        }
+                    },
+
+                    required: [
+                        "jobIndex",
+                        "overallScore",
+                        "skillMatch",
+                        "roleMatch",
+                        "experienceMatch",
+                        "summary"
+                    ]
+                }
+            }
+        },
+
+        required: [
+            "overallRelevance",
+            "jobMatches"
+        ]
+    };
 
     const response = await ollama.chat({
         model: "qwen3:8b",
-        format: "json",
+
+        format: jobMatchSchema,
+
         messages: [
             {
                 role: "user",
                 content: prompt
             }
         ]
-    })
+    });
 
-    const text = response.message.content;
+    const result = JSON.parse(response.message.content);
 
-    const result = JSON.parse(text);
+    /*
+     * Construct the final result using YOUR original job data.
+     *
+     * The LLM does NOT control:
+     * - jobId
+     * - jobTitle
+     * - applyUrl
+     */
+
+    result.jobMatches = result.jobMatches.map((match) => {
+
+        const originalJob = jobFeatures[match.jobIndex];
+
+        // Safety check
+        if (!originalJob) {
+            throw new Error(
+                `Invalid jobIndex returned by LLM: ${match.jobIndex}`
+            );
+        }
+
+        return {
+            jobId: originalJob.jobId,
+
+            jobTitle: originalJob.role,
+
+            overallScore: match.overallScore,
+
+            skillMatch: match.skillMatch,
+
+            roleMatch: match.roleMatch,
+
+            experienceMatch: match.experienceMatch,
+
+            applyUrl: originalJob.applyUrl,
+
+            summary: match.summary
+        };
+    });
 
     return result;
-}
+};
 
 export default calculateJobMatch;

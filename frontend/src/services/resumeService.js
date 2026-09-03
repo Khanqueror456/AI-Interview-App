@@ -40,7 +40,7 @@ export const deleteResume = async (id) => {
 
 export const getJobMatches = async(id) => {
 
-    const response = await api.get(`resumes/get-job-matches/${id}`);
+    const response = await api.get(`resumes/job-matches/${id}`);
     console.log(response.data);
     return response.data;
 }
@@ -50,4 +50,12 @@ export const searchJobs = async(id, data) => {
     const response = await api.post(`resumes/job-matches/${id}`, data);
 
     return response.data;
+}
+
+export const getJobsMatches = async (id) => {
+
+    const response = await api.get(`resumes/jobs-matches/${id}`);
+
+    return response.data;
+
 }

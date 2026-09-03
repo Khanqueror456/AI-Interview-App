@@ -9,7 +9,7 @@ const startServer = async () => {
         console.log(`Server is running on PORT ${PORT}`)
     });
 
-    server.timeout = 1200000;
+    server.timeout = 1200000000;
 }
 
 startServer();

@@ -520,7 +520,7 @@ const Resumes = () => {
                                     </div>
 
 
-                                    {/* Actions */}
+                                    {/* Actions
 
                                     <div className="mt-6 flex gap-3 border-t border-slate-800 pt-5">
 
@@ -555,6 +555,62 @@ const Resumes = () => {
                                         >
                                             Search Jobs
                                         </button>
+
+                                    </div> */}
+
+                                    {/* Actions */}
+
+                                    <div className="mt-6 border-t border-slate-800 pt-5 space-y-3">
+
+                                        {/* Row 1 */}
+                                        <div className="flex gap-3">
+
+                                            <button
+                                                onClick={() =>
+                                                    navigate(
+                                                        `/resumes/${resume._id}/report`
+                                                    )
+                                                }
+                                                className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium transition hover:bg-indigo-500"
+                                            >
+                                                View Report
+                                            </button>
+
+                                            <button
+                                                onClick={() =>
+                                                    navigate(
+                                                        `/resumes/${resume._id}`
+                                                    )
+                                                }
+                                                className="flex-1 rounded-lg border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-800"
+                                            >
+                                                View Details
+                                            </button>
+
+                                        </div>
+
+                                        {/* Row 2 */}
+                                        <div className="flex gap-3">
+
+                                            <button
+                                                onClick={() =>
+                                                    navigate(`/resumes/job-search/${resume._id}`)
+                                                }
+                                                className="flex-1 rounded-lg border border-indigo-500/40 bg-indigo-500/10 px-4 py-2.5 text-sm font-medium text-indigo-300 transition hover:border-indigo-400/60 hover:bg-indigo-500/20 hover:text-indigo-200"
+                                            >
+                                                Search Jobs
+                                            </button>
+
+                                            <button
+                                                onClick={() =>
+                                                    navigate(`/resumes/jobs-matches/${resume._id}`)
+                                                }
+                                                className="flex-1 rounded-lg border border-indigo-500/40 bg-indigo-500/10 px-4 py-2.5 text-sm font-medium text-indigo-300 transition hover:border-indigo-400/60 hover:bg-indigo-500/20 hover:text-indigo-200"
+                                            >
+                                                Job Matches
+                                            </button>
+
+                                        </div>
 
                                     </div>
 

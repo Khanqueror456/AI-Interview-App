@@ -114,6 +114,11 @@ const jobMatchSchema = new mongoose.Schema(
         summary: {
           type: String,
           default: ""
+        },
+
+        applyUrl : {
+          type : String,
+          default : "#"
         }
       },
     ],
