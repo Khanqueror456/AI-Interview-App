@@ -58,15 +58,6 @@ const Interview = () => {
   }, [id])
 
   useEffect(() => {
-  console.log(interview?.currentQuestionsIndex);
-  if (interview?.currentQuestionsIndex >=
-    interview?.questions?.length) {
-    console.log("Calling finish handler");
-    finishInterviewHandler();
-  }
-  }, [interview])
-
-  useEffect(() => {
     console.log(interviewStatus)
   }, [interviewStatus]);
 
@@ -87,6 +78,7 @@ const Interview = () => {
     const id = interview._id;
     const response = await submitAnswer(id, data);
 
+    setInterview(response.interview);
     setFeedback(response.feedback);
   }
 
@@ -131,6 +123,7 @@ const Interview = () => {
 
   const finishInterviewHandler = async () => {
 
+    console.log("Finishing the interview");
     const response = await finishInterview(interview._id);
     setInterviewSummary(response);
   }
@@ -672,10 +665,7 @@ const Interview = () => {
             <button
               onClick={finishInterviewHandler}
               disabled={
-                !(
-                  interview?.currentQuestionsIndex >=
-                  interview?.questions?.length
-                )
+                (interview.status !== "completed")
               }
               className="rounded-lg bg-emerald-600 px-5 py-3 font-medium text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-40"
             >

@@ -1,65 +1,82 @@
-import useAuth from "../../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
+import { Bell } from "lucide-react";
 
-export default function Navbar() {
+/**
+ * Shared navbar. Purely presentational — wire up auth/handlers via props.
+ * Active link styling comes from react-router's NavLink, driven by the current URL,
+ * so no activeHref prop is needed anymore.
+ *
+ * @param {{ label: string, to: string }[]} links
+ * @param {{ name: string, initials: string }} user
+ * @param {() => void} onCtaClick - primary CTA ("Start practice")
+ * @param {() => void} onBellClick
+ * @param {string} logoText
+ */
+export default function Navbar({
+  links = [
+    { label: "Dashboard", to: "/" },
+    { label: "Practice", to: "/interviews/create" },
+    { label: "Resumes", to: "/resumes" },
+  ],
+  user = { name: "Jordan Smith", initials: "JS" },
+  onCtaClick = () => {},
+  onBellClick = () => {},
+  logoText = "cadence",
+}) {
+  return (
+    <nav className="flex items-center justify-between h-16 px-7 bg-white border-b border-[#D8D9D3]">
+      <div className="flex items-center gap-10">
+        <Link
+          to="/"
+          className="text-[21px] font-semibold text-[#14213D] tracking-tight font-['Lora',_Georgia,_serif] no-underline"
+        >
+          {logoText}
+        </Link>
 
-    const { user, logout } = useAuth();
-    const navigate = useNavigate();
+        <ul className="flex gap-7 list-none m-0 p-0">
+          {links.map((link) => (
+            <li key={link.to}>
+              <NavLink
+                to={link.to}
+                end={link.to === "/"}
+                className={({ isActive }) =>
+                  [
+                    "relative inline-block py-[22px] text-[14.5px] font-medium no-underline transition-colors duration-150",
+                    "after:content-[''] after:absolute after:left-0 after:right-0 after:bottom-0 after:h-[2px] after:bg-[#E8A33D]",
+                    "after:origin-left after:transition-transform after:duration-150",
+                    isActive
+                      ? "text-[#14213D] after:scale-x-100"
+                      : "text-[#6B7280] hover:text-[#14213D] after:scale-x-0 hover:after:scale-x-100",
+                  ].join(" ")
+                }
+              >
+                {link.label}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+      </div>
 
-    const handleLogout = async () => {
-        await logout();
-        navigate("/login");
-    };
+      <div className="flex items-center gap-[18px]">
+        <button
+          onClick={onBellClick}
+          aria-label="Notifications"
+          className="p-1.5 rounded-md text-[#6B7280] hover:text-[#14213D] hover:bg-[#EDEEEA] transition-colors duration-150"
+        >
+          <Bell size={19} strokeWidth={1.8} />
+        </button>
 
-    return (
-        <nav className="border-b border-slate-800 bg-slate-950">
+        <button
+          onClick={onCtaClick}
+          className="bg-[#14213D] hover:bg-[#24304F] text-white text-sm font-medium px-[18px] py-[9px] rounded-[5px] transition-colors duration-150"
+        >
+          Start practice
+        </button>
 
-            <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-
-                {/* Brand */}
-                <button
-                    onClick={() => navigate("/")}
-                    className="text-xl font-bold text-white transition hover:text-indigo-400"
-                >
-                    AI Interview
-                </button>
-
-
-                {/* Right Side */}
-                <div className="flex items-center gap-5">
-
-                    {/* User */}
-                    <div className="hidden sm:block text-right">
-
-                        <p className="text-sm font-medium text-white">
-                            {user?.name}
-                        </p>
-
-                        <p className="text-xs text-slate-400">
-                            {user?.email}
-                        </p>
-
-                    </div>
-
-
-                    {/* Avatar */}
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600 text-sm font-semibold text-white">
-                        {user?.name?.charAt(0).toUpperCase()}
-                    </div>
-
-
-                    {/* Logout */}
-                    <button
-                        onClick={handleLogout}
-                        className="rounded-lg border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-red-500 hover:bg-red-500/10 hover:text-red-400"
-                    >
-                        Logout
-                    </button>
-
-                </div>
-
-            </div>
-
-        </nav>
-    );
+        <div className="w-[34px] h-[34px] rounded-full bg-[#E8A33D] text-[#14213D] text-[13px] font-semibold flex items-center justify-center">
+          {user.initials}
+        </div>
+      </div>
+    </nav>
+  );
 }

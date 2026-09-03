@@ -17,6 +17,7 @@ import JobMatchList from "../pages/JobMatchList";
 
 import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../components/layout/MainLayout";
+import MyInterviews from "../pages/MyInterviews";
 
 
 const AppRoutes = () => {
@@ -34,6 +35,7 @@ const AppRoutes = () => {
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/interviews/" element={<MyInterviews />} />
             <Route path="/interviews/create" element={<CreateInterview />} />
             <Route path="/interviews/:id" element={<Interview />} />
             <Route path="/interviews/:id/report" element={<Report />} />

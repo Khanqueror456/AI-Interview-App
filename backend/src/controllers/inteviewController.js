@@ -238,7 +238,9 @@ export const skipCurrentQuestion = asyncHandler(async (req, res) => {
     if (!interview) {
         return res.status(404).json({ message: "Interview not found" });
     }
-
+    
+    const currentQuestionsIndex = interview.currentQuestionsIndex++;
+    await interview.save();
     if (
         interview.currentQuestionsIndex >=
         interview.questions.length
@@ -258,7 +260,6 @@ export const skipCurrentQuestion = asyncHandler(async (req, res) => {
         )
     }
 
-    const currentQuestionsIndex = interview.currentQuestionsIndex++;
 
 
     await interview.save();
@@ -320,30 +321,31 @@ export const submitAnswer = asyncHandler(async (req, res) => {
     await question.save();
 
     interview.currentQuestionsIndex++;
-
+    
     await interview.save();
-
+    
     if (
         interview.currentQuestionsIndex >=
         interview.questions.length
     ) {
         interview.status = "completed";
         interview.endedAt = new Date(Date.now()).toISOString();
-
+        
         await interview.save();
         return res.status(200).json({
             success: true,
             feedback,
-            interviewCompleted: true
+            interviewCompleted: true,
+            interview
         })
     }
-
 
     res.status(200).json({
         success: true,
         feedback,
         currentQuestionIndex: interview.currentQuestionsIndex,
-        interviewCompleted: false
+        interviewCompleted: false,
+        interview
     });
 
 
@@ -399,8 +401,11 @@ export const finishInterview = asyncHandler(async (req, res) => {
         }
     }
 
+    console.log("This is overall score",overallScore);
+    console.log("This is total score", totalQuestions * 10);
+    console.log((overallScore / (totalQuestions * 10)))
     // overallScore = Math.round((overallScore / totalScore) * 100);
-    interview.score = overallScore;
+    interview.score = Math.round((overallScore / (totalQuestions * 10)) * 100);
     interview.correctlyAnswered = correctlyAnswered;
     interview.attemptedQuestions = attemptedQuestions;
 
