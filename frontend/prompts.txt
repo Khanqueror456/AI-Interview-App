@@ -1,0 +1,3 @@
+### Redesign frontend for a page while retaining the previous logic
+
+now we will work with <Page name>, I have provided the current layout/design for this in the image, remember this image is just for reference and you have create a new design from scratch which is better than this with more icons, animations, colors and interactions, improve the layout and any other improvement from design perspective. I will also paste the file so that you can go through the logical part and get to know the functions, variables and imports

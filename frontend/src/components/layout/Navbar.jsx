@@ -17,6 +17,7 @@ export default function Navbar({
     { label: "Dashboard", to: "/" },
     { label: "Practice", to: "/interviews/create" },
     { label : "Interviews", to: "/interviews"},
+    { label : "Analyze resumes", to: "/resume/analyzer"},
     { label: "Resumes", to: "/resumes" },
   ],
   user = { name: "Jordan Smith", initials: "JS" },

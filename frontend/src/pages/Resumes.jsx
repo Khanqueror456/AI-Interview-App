@@ -1,8 +1,33 @@
-import React, { useEffect, useState } from "react";
+
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { animate, stagger } from "animejs";
+import {
+    Search,
+    X,
+    FileText,
+    Trash2,
+    User,
+    Tag,
+    ClipboardList,
+    Eye,
+    Briefcase,
+    Target,
+    FileQuestion,
+    Plus,
+} from "lucide-react";
 import { getResumes, deleteResume } from "../services/resumeService";
+import LoadingScreen from "../components/layout/LoadingScreen";
+import ErrorScreen from "../components/layout/ErrorScreen";
 
+function prefersReducedMotion() {
+    return (
+        typeof window !== "undefined" &&
+        window.matchMedia &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    );
+}
 
 const Resumes = () => {
 
@@ -17,6 +42,8 @@ const Resumes = () => {
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState("all");
 
+    const headerRef = useRef(null);
+    const gridRef = useRef(null);
 
     useEffect(() => {
 
@@ -47,11 +74,6 @@ const Resumes = () => {
         fetchResumes();
 
     }, []);
-
-
-    // useEffect(() => {
-    //     console.log("Resumes", resumes);
-    // }, [resumes]);
 
 
     const filteredResumes = resumes.filter((resume) => {
@@ -126,156 +148,146 @@ const Resumes = () => {
         }
     };
 
+    // Entrance animation once data has loaded in.
+    useEffect(() => {
+        if (loading || error) return;
+        const reduced = prefersReducedMotion();
+
+        animate(headerRef.current, {
+            opacity: [0, 1],
+            translateY: [10, 0],
+            duration: reduced ? 0 : 450,
+            ease: "outQuad",
+        });
+    }, [loading, error]);
+
+    // Re-run the card stagger whenever the visible (filtered) set changes.
+    useEffect(() => {
+        if (loading || error || !gridRef.current) return;
+        const reduced = prefersReducedMotion();
+
+        animate(gridRef.current.children, {
+            opacity: [0, 1],
+            translateY: [14, 0],
+            duration: reduced ? 0 : 400,
+            delay: reduced ? 0 : stagger(70),
+            ease: "outQuad",
+        });
+    }, [loading, error, filteredResumes]);
+
 
     if (loading) {
-
-        return (
-            <div className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
-
-                <div className="text-center">
-
-                    <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-slate-700 border-t-indigo-500" />
-
-                    <p className="text-slate-400">
-                        Loading resumes...
-                    </p>
-
-                </div>
-
-            </div>
-        );
+        return <LoadingScreen title="Loading your resumes" subtitle="This usually takes a few seconds." />;
     }
 
 
     if (error) {
-
         return (
-            <div className="flex min-h-screen items-center justify-center bg-slate-950">
-
-                <p className="text-red-400">
-                    {error}
-                </p>
-
-            </div>
+            <ErrorScreen
+                title="Couldn't load your resumes"
+                body={error}
+                onReconnect={() => window.location.reload()}
+                onBack={() => navigate("/")}
+            />
         );
     }
+
+    const hasActiveFilters = search !== "" || filter !== "all";
+    const clearFilters = () => {
+        setSearch("");
+        setFilter("all");
+    };
 
 
     return (
 
-        <div className="min-h-screen bg-slate-950 px-6 py-10 text-white">
+        <div className="min-h-screen bg-[#EDEEEA] px-6 py-9">
 
             <div className="mx-auto max-w-6xl">
 
 
                 {/* Header */}
 
-                <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                <div
+                    ref={headerRef}
+                    style={{ opacity: 0 }}
+                    className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+                >
 
                     <div>
-
-                        <h1 className="text-3xl font-bold">
-                            My Resumes
-                        </h1>
-
-                        <p className="mt-2 text-slate-400">
-                            View and manage your uploaded resumes
+                        <p className="text-[24px] font-semibold text-[#14213D] font-['Lora',_Georgia,_serif] m-0">
+                            Your resumes
                         </p>
-
+                        <p className="mt-1.5 text-[14.5px] text-[#6B7280] m-0">
+                            View and manage your uploaded resumes.
+                        </p>
                     </div>
-
-                    {/* Search & Filters */}
-
-                    <div className="mb-8 rounded-2xl border border-slate-800 bg-slate-900 p-4">
-
-                        <div className="flex flex-col gap-4 md:flex-row">
-
-                            {/* Search */}
-
-                            <div className="relative flex-1">
-
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
-                                    🔍
-                                </span>
-
-                                <input
-                                    type="text"
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    placeholder="Search resumes, names, skills..."
-                                    className="w-full rounded-xl border border-slate-700 bg-slate-950 py-3 pl-11 pr-4 text-white placeholder-slate-500 outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                                />
-
-                            </div>
-
-
-                            {/* Filter */}
-
-                            <select
-                                value={filter}
-                                onChange={(e) => setFilter(e.target.value)}
-                                className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-slate-300 outline-none transition focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                            >
-
-                                <option value="all">
-                                    All Resumes
-                                </option>
-
-                                <option value="analyzed">
-                                    Analyzed
-                                </option>
-
-                                <option value="not-analyzed">
-                                    Not Analyzed
-                                </option>
-
-                            </select>
-
-
-                            {/* Clear */}
-
-                            {(search || filter !== "all") && (
-
-                                <button
-                                    onClick={() => {
-                                        setSearch("");
-                                        setFilter("all");
-                                    }}
-                                    className="rounded-xl border border-slate-700 px-5 py-3 text-sm text-slate-400 transition hover:bg-slate-800 hover:text-white"
-                                >
-                                    Clear
-                                </button>
-
-                            )}
-
-                        </div>
-
-
-                        {/* Result count */}
-
-                        <div className="mt-4 text-sm text-slate-500">
-
-                            Showing{" "}
-                            <span className="font-medium text-slate-300">
-                                {filteredResumes.length}
-                            </span>{" "}
-                            of{" "}
-                            <span className="font-medium text-slate-300">
-                                {resumes.length}
-                            </span>{" "}
-                            resumes
-
-                        </div>
-
-                    </div>
-
 
                     <button
                         onClick={() => navigate("/resume/analyzer")}
-                        className="rounded-xl bg-indigo-600 px-5 py-3 font-medium transition hover:bg-indigo-500"
+                        className="flex items-center gap-1.5 bg-[#14213D] hover:bg-[#24304F] text-white text-sm font-medium px-4 py-2.5 rounded-[6px] transition-colors duration-150 w-fit"
                     >
-                        + Upload Resume
+                        <Plus size={16} strokeWidth={2} />
+                        Upload resume
                     </button>
+
+                </div>
+
+
+                {/* Search & filters */}
+
+                <div className="mb-8 rounded-[8px] border border-[#D8D9D3] bg-white p-4">
+
+                    <div className="flex flex-col gap-3 md:flex-row md:items-center">
+
+                        {/* Search */}
+                        <div className="relative flex-1 min-w-[200px]">
+                            <Search
+                                size={16}
+                                strokeWidth={1.8}
+                                className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA0A8]"
+                            />
+                            <input
+                                type="text"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="Search resumes, names, skills..."
+                                className="w-full rounded-[6px] border border-[#D8D9D3] bg-white pl-9 pr-3 py-2.5 text-[13.5px] text-[#14213D] placeholder-[#9CA0A8] outline-none transition-colors duration-150 focus:border-[#14213D] focus:ring-1 focus:ring-[#14213D]"
+                            />
+                        </div>
+
+                        {/* Filter */}
+                        <select
+                            value={filter}
+                            onChange={(e) => setFilter(e.target.value)}
+                            className="rounded-[6px] border border-[#D8D9D3] bg-white px-3 py-2.5 text-[13.5px] text-[#14213D] outline-none transition-colors duration-150 focus:border-[#14213D] focus:ring-1 focus:ring-[#14213D]"
+                        >
+                            <option value="all">All resumes</option>
+                            <option value="analyzed">Analyzed</option>
+                            <option value="not-analyzed">Not analyzed</option>
+                        </select>
+
+                        {/* Clear */}
+                        {hasActiveFilters && (
+                            <button
+                                onClick={clearFilters}
+                                className="flex items-center gap-1 text-[13px] font-medium text-[#6B7280] hover:text-[#14213D] transition-colors duration-150 px-2 py-2.5 whitespace-nowrap"
+                            >
+                                <X size={14} strokeWidth={2} />
+                                Clear
+                            </button>
+                        )}
+
+                    </div>
+
+                    {/* Result count */}
+                    <div className="mt-3 text-[13px] text-[#6B7280]">
+                        Showing{" "}
+                        <span className="font-medium text-[#14213D]">{filteredResumes.length}</span>{" "}
+                        of{" "}
+                        <span className="font-medium text-[#14213D]">{resumes.length}</span>{" "}
+                        resumes
+                    </div>
 
                 </div>
 
@@ -284,347 +296,229 @@ const Resumes = () => {
 
                 {resumes.length === 0 ? (
 
-                    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-12 text-center">
+                    <div className="rounded-[10px] border border-dashed border-[#D8D9D3] bg-white p-12 text-center">
 
-                        <div className="mb-4 text-5xl">
-                            📄
+                        <div className="w-12 h-12 rounded-full bg-[#F7F7F4] border border-[#D8D9D3] flex items-center justify-center mx-auto mb-4">
+                            <FileQuestion size={22} strokeWidth={1.8} className="text-[#6B7280]" />
                         </div>
 
-                        <h2 className="text-xl font-semibold">
-                            No resumes yet
-                        </h2>
-
-                        <p className="mt-2 text-slate-400">
+                        <p className="text-[16px] font-semibold text-[#14213D] m-0">No resumes yet</p>
+                        <p className="mt-2 text-[14px] text-[#6B7280] mb-6">
                             Upload your first resume to get started.
                         </p>
 
                         <button
                             onClick={() => navigate("/resume/analyzer")}
-                            className="mt-6 rounded-xl bg-indigo-600 px-6 py-3 font-medium transition hover:bg-indigo-500"
+                            className="inline-flex items-center gap-1.5 bg-[#14213D] hover:bg-[#24304F] text-white text-sm font-medium px-5 py-2.5 rounded-[6px] transition-colors duration-150"
                         >
-                            Upload Resume
+                            <Plus size={16} strokeWidth={2} />
+                            Upload resume
                         </button>
 
                     </div>
 
                 ) : filteredResumes.length === 0 ? (
 
-                    <div className="rounded-2xl border border-slate-800 bg-slate-900 p-10 text-center">
+                    <div className="rounded-[10px] border border-dashed border-[#D8D9D3] bg-white p-12 text-center">
 
-                        <div className="mb-4 text-4xl">
-                            🔍
+                        <div className="w-12 h-12 rounded-full bg-[#F7F7F4] border border-[#D8D9D3] flex items-center justify-center mx-auto mb-4">
+                            <Search size={22} strokeWidth={1.8} className="text-[#6B7280]" />
                         </div>
 
-                        <h2 className="text-xl font-semibold">
-                            No matching resumes
-                        </h2>
-
-                        <p className="mt-2 text-slate-400">
+                        <p className="text-[16px] font-semibold text-[#14213D] m-0">No matching resumes</p>
+                        <p className="mt-2 text-[14px] text-[#6B7280] mb-6">
                             Try changing your search or filters.
                         </p>
 
                         <button
-                            onClick={() => {
-                                setSearch("");
-                                setFilter("all");
-                            }}
-                            className="mt-5 rounded-lg border border-slate-700 px-5 py-2.5 text-sm text-slate-300 transition hover:bg-slate-800"
+                            onClick={clearFilters}
+                            className="inline-flex items-center gap-1.5 border border-[#D8D9D3] hover:bg-[#F7F7F4] text-[#14213D] text-sm font-medium px-5 py-2.5 rounded-[6px] transition-colors duration-150"
                         >
-                            Clear Filters
+                            <X size={15} strokeWidth={2} />
+                            Clear filters
                         </button>
 
                     </div>
 
                 ) : (
 
-                    <div className="grid gap-6 md:grid-cols-2">
-
+                    <div ref={gridRef} className="grid gap-5 md:grid-cols-2">
 
                         {filteredResumes?.map((resume) => {
 
                             const parsedData = resume.parsedData || {};
                             const analysis = resume.analysis || {};
 
-                            const personalInfo =
-                                parsedData.personalInfo || {};
-
-                            const skills =
-                                parsedData.skills || [];
-
+                            const personalInfo = parsedData.personalInfo || {};
+                            const skills = parsedData.skills || [];
+                            const hasScore = analysis.score != null;
 
                             return (
-
                                 <div
                                     key={resume._id}
-                                    className="rounded-2xl border border-slate-800 bg-slate-900 p-6 transition hover:border-slate-700"
+                                    style={{ opacity: 0 }}
+                                    className="rounded-[10px] border border-[#D8D9D3] bg-white p-6 transition-[transform,box-shadow] duration-300 hover:-translate-y-[3px] hover:shadow-[0_10px_24px_rgba(20,33,61,0.1)]"
                                 >
 
-
                                     {/* Resume header */}
-
                                     <div className="flex items-start justify-between gap-4">
 
-                                        <div className="flex items-center gap-4">
-
-                                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/10 text-2xl">
-                                                📄
+                                        <div className="flex items-center gap-3.5">
+                                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[8px] bg-[#E7EAF3]">
+                                                <FileText size={19} strokeWidth={1.8} className="text-[#14213D]" />
                                             </div>
 
-
-                                            <div>
-
-                                                <h2 className="font-semibold">
-
-                                                    {resume.originalFile?.filename ||
-                                                        "Resume"}
-
-                                                </h2>
-
-                                                <p className="mt-1 text-sm text-slate-500">
-
-                                                    {resume.createdAt
-                                                        ? new Date(
-                                                            resume.createdAt
-                                                        ).toLocaleDateString()
-                                                        : "Unknown date"}
-
+                                            <div className="min-w-0">
+                                                <p className="font-semibold text-[14.5px] text-[#14213D] m-0 truncate">
+                                                    {resume.originalFile?.filename || "Resume"}
                                                 </p>
-
+                                                <p className="mt-0.5 text-[12.5px] text-[#9CA0A8] m-0">
+                                                    {resume.createdAt
+                                                        ? new Date(resume.createdAt).toLocaleDateString()
+                                                        : "Unknown date"}
+                                                </p>
                                             </div>
-
                                         </div>
 
-
                                         {/* Delete */}
-
                                         <button
-                                            onClick={() =>
-                                                handleDelete(resume._id)
-                                            }
-                                            disabled={
-                                                deletingId === resume._id
-                                            }
-                                            className="rounded-lg px-3 py-2 text-sm text-red-400 transition hover:bg-red-500/10 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-40"
+                                            onClick={() => handleDelete(resume._id)}
+                                            disabled={deletingId === resume._id}
+                                            className="flex items-center gap-1 shrink-0 rounded-[6px] px-2.5 py-1.5 text-[12.5px] font-medium text-[#C24444] transition-colors duration-150 hover:bg-[#FBEAEA] disabled:cursor-not-allowed disabled:opacity-40"
                                         >
-
-                                            {deletingId === resume._id
-                                                ? "Deleting..."
-                                                : "Delete"}
-
+                                            <Trash2 size={13} strokeWidth={1.8} />
+                                            {deletingId === resume._id ? "Deleting..." : "Delete"}
                                         </button>
 
                                     </div>
 
 
                                     {/* Score */}
+                                    <div className="mt-5 flex items-center justify-between rounded-[8px] bg-[#F7F7F4] border border-[#D8D9D3] p-4">
 
-                                    <div className="mt-6 flex items-center justify-between rounded-xl bg-slate-950 p-4">
-
-                                        <div>
-
-                                            <p className="text-sm text-slate-400">
-                                                Resume Score
-                                            </p>
-
-                                            <p className="mt-1 text-2xl font-bold text-indigo-400">
-
-                                                {analysis.score ?? "—"}
-
-                                                {analysis.score != null && (
-                                                    <span className="text-sm text-slate-500">
-                                                        /100
-                                                    </span>
-                                                )}
-
-                                            </p>
-
+                                        <div className="flex items-center gap-3.5">
+                                            {hasScore && (
+                                                <div
+                                                    className="w-11 h-11 rounded-full flex items-center justify-center shrink-0"
+                                                    style={{
+                                                        background: `conic-gradient(#E8A33D ${analysis.score}%, #EDEEEA 0)`,
+                                                    }}
+                                                >
+                                                    <div className="w-[34px] h-[34px] rounded-full bg-white" />
+                                                </div>
+                                            )}
+                                            <div>
+                                                <p className="text-[12.5px] text-[#6B7280] m-0">Resume score</p>
+                                                <p className="mt-0.5 text-[19px] font-semibold text-[#14213D] m-0">
+                                                    {analysis.score ?? "—"}
+                                                    {hasScore && (
+                                                        <span className="text-[12.5px] font-normal text-[#9CA0A8]">/100</span>
+                                                    )}
+                                                </p>
+                                            </div>
                                         </div>
 
-
                                         <div className="text-right">
-
-                                            <p className="text-sm text-slate-400">
+                                            <p className="flex items-center justify-end gap-1 text-[12.5px] text-[#6B7280] m-0">
+                                                <Tag size={11} strokeWidth={2} />
                                                 Skills
                                             </p>
-
-                                            <p className="mt-1 font-semibold">
+                                            <p className="mt-0.5 font-semibold text-[19px] text-[#14213D] m-0">
                                                 {skills.length}
                                             </p>
-
                                         </div>
 
                                     </div>
 
 
                                     {/* Candidate */}
-
                                     <div className="mt-5">
-
-                                        <p className="text-sm text-slate-400">
+                                        <p className="flex items-center gap-1 text-[12.5px] text-[#6B7280] m-0">
+                                            <User size={12} strokeWidth={1.8} />
                                             Candidate
                                         </p>
-
-                                        <p className="mt-1 font-medium">
+                                        <p className="mt-1 font-medium text-[14px] text-[#14213D] m-0">
                                             {personalInfo.name || "Unknown"}
                                         </p>
-
                                     </div>
 
 
                                     {/* Skills */}
-
                                     <div className="mt-5">
+                                        <p className="mb-2 text-[12.5px] text-[#6B7280] m-0">Skills</p>
 
-                                        <p className="mb-2 text-sm text-slate-400">
-                                            Skills
-                                        </p>
-
-                                        <div className="flex flex-wrap gap-2">
-
+                                        <div className="flex flex-wrap gap-1.5">
                                             {skills.length > 0 ? (
-
-                                                skills
-                                                    .slice(0, 6)
-                                                    .map((skill, index) => (
-
-                                                        <span
-                                                            key={index}
-                                                            className="rounded-md bg-slate-800 px-2.5 py-1 text-xs text-slate-300"
-                                                        >
-                                                            {skill}
-                                                        </span>
-
-                                                    ))
-
+                                                skills.slice(0, 6).map((skill, index) => (
+                                                    <span
+                                                        key={index}
+                                                        className="rounded-[5px] bg-[#F7F7F4] border border-[#D8D9D3] px-2.5 py-1 text-[12px] text-[#4B5160]"
+                                                    >
+                                                        {skill}
+                                                    </span>
+                                                ))
                                             ) : (
-
-                                                <span className="text-sm text-slate-500">
-                                                    No skills found
-                                                </span>
-
+                                                <span className="text-[13px] text-[#9CA0A8]">No skills found</span>
                                             )}
-
 
                                             {skills.length > 6 && (
-
-                                                <span className="rounded-md bg-slate-800 px-2.5 py-1 text-xs text-slate-500">
-
+                                                <span className="rounded-[5px] bg-[#F7F7F4] border border-[#D8D9D3] px-2.5 py-1 text-[12px] text-[#9CA0A8]">
                                                     +{skills.length - 6}
-
                                                 </span>
-
                                             )}
-
                                         </div>
-
                                     </div>
 
 
-                                    {/* Actions
-
-                                    <div className="mt-6 flex gap-3 border-t border-slate-800 pt-5">
-
-                                        <button
-                                            onClick={() =>
-                                                navigate(
-                                                    `/resumes/${resume._id}/report`
-                                                )
-                                            }
-                                            className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium transition hover:bg-indigo-500"
-                                        >
-                                            View Report
-                                        </button>
-
-
-                                        <button
-                                            onClick={() =>
-                                                navigate(
-                                                    `/resumes/${resume._id}`
-                                                )
-                                            }
-                                            className="flex-1 rounded-lg border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-800"
-                                        >
-                                            View Details
-                                        </button>
-
-                                        <button
-                                            onClick={() =>
-                                                navigate(`/resumes/job-search/${resume._id}`)
-                                            }
-                                            className="flex-1 rounded-lg border border-indigo-500/40 bg-indigo-500/10 px-4 py-2.5 text-sm font-medium text-indigo-300 transition hover:border-indigo-400/60 hover:bg-indigo-500/20 hover:text-indigo-200"
-                                        >
-                                            Search Jobs
-                                        </button>
-
-                                    </div> */}
-
                                     {/* Actions */}
-
-                                    <div className="mt-6 border-t border-slate-800 pt-5 space-y-3">
+                                    <div className="mt-6 border-t border-[#EDEEEA] pt-5 space-y-2.5">
 
                                         {/* Row 1 */}
-                                        <div className="flex gap-3">
-
+                                        <div className="flex gap-2.5">
                                             <button
-                                                onClick={() =>
-                                                    navigate(
-                                                        `/resumes/${resume._id}/report`
-                                                    )
-                                                }
-                                                className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium transition hover:bg-indigo-500"
+                                                onClick={() => navigate(`/resumes/${resume._id}/report`)}
+                                                className="flex flex-1 items-center justify-center gap-1.5 rounded-[6px] bg-[#14213D] hover:bg-[#24304F] px-4 py-2.5 text-[13px] font-medium text-white transition-colors duration-150"
                                             >
-                                                View Report
+                                                <ClipboardList size={14} strokeWidth={1.8} />
+                                                View report
                                             </button>
 
                                             <button
-                                                onClick={() =>
-                                                    navigate(
-                                                        `/resumes/${resume._id}`
-                                                    )
-                                                }
-                                                className="flex-1 rounded-lg border border-slate-700 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:bg-slate-800"
+                                                onClick={() => navigate(`/resumes/${resume._id}`)}
+                                                className="flex flex-1 items-center justify-center gap-1.5 rounded-[6px] border border-[#D8D9D3] hover:bg-[#F7F7F4] px-4 py-2.5 text-[13px] font-medium text-[#14213D] transition-colors duration-150"
                                             >
-                                                View Details
+                                                <Eye size={14} strokeWidth={1.8} />
+                                                View details
                                             </button>
-
                                         </div>
 
                                         {/* Row 2 */}
-                                        <div className="flex gap-3">
-
+                                        <div className="flex gap-2.5">
                                             <button
-                                                onClick={() =>
-                                                    navigate(`/resumes/job-search/${resume._id}`)
-                                                }
-                                                className="flex-1 rounded-lg border border-indigo-500/40 bg-indigo-500/10 px-4 py-2.5 text-sm font-medium text-indigo-300 transition hover:border-indigo-400/60 hover:bg-indigo-500/20 hover:text-indigo-200"
+                                                onClick={() => navigate(`/resumes/job-search/${resume._id}`)}
+                                                className="flex flex-1 items-center justify-center gap-1.5 rounded-[6px] border border-[#E8A33D]/40 bg-[#FBEEDA] hover:bg-[#F7E3C4] px-4 py-2.5 text-[13px] font-medium text-[#C9822A] transition-colors duration-150"
                                             >
-                                                Search Jobs
+                                                <Briefcase size={14} strokeWidth={1.8} />
+                                                Search jobs
                                             </button>
 
                                             <button
-                                                onClick={() =>
-                                                    navigate(`/resumes/jobs-matches/${resume._id}`)
-                                                }
-                                                className="flex-1 rounded-lg border border-indigo-500/40 bg-indigo-500/10 px-4 py-2.5 text-sm font-medium text-indigo-300 transition hover:border-indigo-400/60 hover:bg-indigo-500/20 hover:text-indigo-200"
+                                                onClick={() => navigate(`/resumes/jobs-matches/${resume._id}`)}
+                                                className="flex flex-1 items-center justify-center gap-1.5 rounded-[6px] border border-[#E8A33D]/40 bg-[#FBEEDA] hover:bg-[#F7E3C4] px-4 py-2.5 text-[13px] font-medium text-[#C9822A] transition-colors duration-150"
                                             >
-                                                Job Matches
+                                                <Target size={14} strokeWidth={1.8} />
+                                                Job matches
                                             </button>
-
                                         </div>
 
                                     </div>
 
                                 </div>
-
                             );
 
                         })}
 
                     </div>
-
-
-
-
 
                 )}
 
