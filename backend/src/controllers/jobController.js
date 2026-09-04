@@ -12,11 +12,11 @@ export const searchAndMatchJobs = asyncHandler(async (req, res) => {
 
     const resumeId = req.params.id;
     const userId = req.user.id;
-    const {country = "in", role = "network engineer", location="Bangalore"} = req.body;
+    const { country = "in", role = "network engineer", location = "Bangalore" } = req.body;
 
     const resume = await Resume.findOne({
-        _id : resumeId,
-        user : userId
+        _id: resumeId,
+        user: userId
     });
 
     const parsedData = resume.parsedData;
@@ -53,15 +53,15 @@ export const searchAndMatchJobs = asyncHandler(async (req, res) => {
     console.log(result);
 
     const jobMatches = await JobMatch.create({
-        resumeId : resumeId,
-        candidateId : userId,
-        searchCriteria : {
-            country : country,
-            role : role,
-            location : location
+        resumeId: resumeId,
+        candidateId: userId,
+        searchCriteria: {
+            country: country,
+            role: role,
+            location: location
         },
-        overallRelevance : result.overallRelevance,
-        jobMatches : result.jobMatches
+        overallRelevance: result.overallRelevance,
+        jobMatches: result.jobMatches
     });
 
     return res.status(200).json(jobMatches._id);
@@ -77,13 +77,12 @@ export const getJobMatches = asyncHandler(async (req, res) => {
     console.log("In Da Club");
 
     const jobMatches = await JobMatch.findOne({
-        _id : jobMatchesId,
-        candidateId : userId
+        _id: jobMatchesId,
+        candidateId: userId
     });
 
-    if (!jobMatches)
-    {
-        return res.status(400).json({message : "Job matches not found"});
+    if (!jobMatches) {
+        return res.status(400).json({ message: "Job matches not found" });
     }
 
     return res.status(200).json(jobMatches);
@@ -91,20 +90,46 @@ export const getJobMatches = asyncHandler(async (req, res) => {
 
 export const getJobsMatches = asyncHandler(async (req, res) => {
 
-  const userId = req.user.id;
-  const resumeId = req.params.id;
+    const userId = req.user.id;
+    const resumeId = req.params.id;
 
-  console.log(userId, resumeId);
+    console.log(userId, resumeId);
 
-  const jobsMatches = await JobMatch.find({
-    candidateId: userId,
-    resumeId : resumeId
-  }) || [];
+    const jobsMatches = await JobMatch.find({
+        candidateId: userId,
+        resumeId: resumeId
+    }) || [];
 
-  if (jobsMatches.length == 0)
-  {
-    return res.status(404).json({message : "No job matches found"});
-  }
+    if (jobsMatches.length == 0) {
+        return res.status(404).json({ message: "No job matches found" });
+    }
 
-  return res.status(200).json(jobsMatches);
+    return res.status(200).json(jobsMatches);
+});
+
+export const getJobsMatchByUserId = asyncHandler(async (req, res) => {
+
+    console.log("Get job by user id");
+
+    const userId = req.user.id;
+
+    console.log(userId);
+
+    const jobsMatches = await JobMatch.find({
+        candidateId: userId,
+    }) || [];
+
+    if (jobsMatches.length == 0) {
+        return res.status(404).json({ message: "No job matches found" });
+    }
+
+    return res.status(200).json(jobsMatches);
+
+})
+
+export const giveTheMysteryNumber = asyncHandler(async (req, res) => {
+
+    console.log("Getting the mystery number");
+
+    return res.status(200).json({value : 1001});
 })
