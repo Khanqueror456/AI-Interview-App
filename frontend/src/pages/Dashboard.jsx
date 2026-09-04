@@ -1,13 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { animate, stagger, svg } from "animejs";
 import { CheckCircle2, Clock3, TrendingUp, Briefcase, ArrowUpRight, Sparkles } from "lucide-react";
 import useAuth from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import LoadingScreen from "../components/layout/LoadingScreen";
 import ErrorScreen from "../components/layout/ErrorScreen";
-
+import { Link } from "react-router-dom";
 // Helper functions
 import { getInterviews } from "../services/interviewService";
+import { getJobsMatchByUserId } from "../services/resumeService";
 
 function prefersReducedMotion() {
   return (
@@ -26,7 +27,7 @@ function prefersReducedMotion() {
  * @param {{ name: string }} user
  * @param {{ total: number, completed: number, pending: number, avgScore: number }} stats
  * @param {{ label: string, value: number }[]} performanceTrend - last N interview scores, oldest first
- * @param {{ id: string, role: string, company: string, matchPercent: number }[]} jobMatches
+ * @param {{ id: string, role: string, company: string, matchPercent: number }[]} jobsMatch
  */
 export default function Dashboard({
 
@@ -37,12 +38,7 @@ export default function Dashboard({
     { label: "3", value: 61 },
     { label: "4", value: 72 },
     { label: "5", value: 78 },
-  ],
-  jobMatches = [
-    { id: "1", role: "Frontend Engineer", company: "Northwind Labs", matchPercent: 91 },
-    { id: "2", role: "Product Designer", company: "Aster & Co", matchPercent: 84 },
-    { id: "3", role: "Backend Engineer", company: "Fieldstone", matchPercent: 79 },
-  ],
+  ]
 }) {
 
 
@@ -50,7 +46,13 @@ export default function Dashboard({
   const [interviews, setInterviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
+  const [jobsMatch, setJobMatches] = useState([]);
+  const [processedJobMatches, setProcessedJobMatches] = useState([]);
+
+  useEffect(() => {
+
+    // console.log(jobsMatch);
+  }, [jobsMatch]);
 
 
   useEffect(() => {
@@ -61,7 +63,7 @@ export default function Dashboard({
 
         const data = await getInterviews();
 
-        console.log(data);
+        // console.log(data);
         setInterviews(data.interviews);
 
       } catch (error) {
@@ -79,6 +81,41 @@ export default function Dashboard({
 
     fetchInterviews();
   }, [])
+
+  useEffect(() => {
+
+    const fetchJobMatches = async () => {
+
+      try {
+
+        const data = await getJobsMatchByUserId();
+
+        setJobMatches(data);
+
+      } catch (error) {
+
+        setError(
+          error.response?.data?.message || "Failed to load job matches"
+        )
+
+      } finally {
+
+        setLoading(false);
+
+      }
+    }
+
+    fetchJobMatches();
+  }, [])
+
+  useMemo(() => {
+
+    const allMatches = jobsMatch?.flatMap(item => item.jobMatches).sort((a, b) => b - a);
+    console.log("This is allMatches", allMatches);
+    setProcessedJobMatches(allMatches.slice(0,3));
+
+  }, [jobsMatch]);
+
 
   const getPendingInterviews = () => {
     return interviews.filter(
@@ -105,7 +142,7 @@ export default function Dashboard({
       if (interview.status == "completed" )
       {
         totalScore += interview.score;
-        console.log(interview.score)
+        // console.log(interview.score)
         count++;
 
       }
@@ -194,13 +231,13 @@ export default function Dashboard({
           <div className="flex items-center justify-between mb-4">
             <p className="text-[15px] font-semibold text-[#14213D] m-0">Job matches</p>
             <span className="text-[12px] font-medium text-[#3B7A57] bg-[#E3F0E8] px-2 py-0.5 rounded-full">
-              {jobMatches.length} new
+              {processedJobMatches?.length} new
             </span>
           </div>
 
           <div className="flex flex-col gap-1">
-            {jobMatches.map((job, i) => (
-              <JobMatchRow key={job.id} job={job} index={i} />
+            {processedJobMatches?.map((job, i) => (
+              <Link to={`${job.applyUrl}`} target="blank"><JobMatchRow key={job.jobId} job={job} index={i} /></Link>
             ))}
           </div>
         </FadeInCard>
@@ -367,15 +404,15 @@ function JobMatchRow({ job, index }) {
           className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-semibold text-white shrink-0"
           style={{ backgroundColor: bg }}
         >
-          {job.company.slice(0, 2).toUpperCase()}
+          {/* {job.company.slice(0, 2).toUpperCase()} */}
         </div>
         <div>
-          <p className="text-[13.5px] font-medium text-[#14213D] m-0">{job.role}</p>
-          <p className="text-[12.5px] text-[#6B7280] m-0">{job.company}</p>
+          <p className="text-[13.5px] font-medium text-[#14213D] m-0">{job.jobTitle}</p>
+          {/* <p className="text-[12.5px] text-[#6B7280] m-0">{job.company}</p> */}
         </div>
       </div>
       <span className={`flex items-center gap-0.5 text-[12px] font-semibold px-2 py-0.5 rounded-full ${badgeColor}`}>
-        {job.matchPercent}%
+        {job.overallScore}%
         <ArrowUpRight size={12} strokeWidth={2.2} />
       </span>
     </div>

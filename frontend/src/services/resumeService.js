@@ -59,3 +59,10 @@ export const getJobsMatches = async (id) => {
     return response.data;
 
 }
+
+export const getJobsMatchByUserId = async () => {
+
+    const response = await api.get("resumes/jobs-match-by-user-id");
+
+    return response.data;
+}

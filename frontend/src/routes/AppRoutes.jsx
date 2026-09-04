@@ -19,10 +19,13 @@ import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../components/layout/MainLayout";
 import MyInterviews from "../pages/MyInterviews";
 
+import ScrollToTop from "../components/utils/ScrollToTop.jsx";
+
 
 const AppRoutes = () => {
   return (
     <BrowserRouter>
+    <ScrollToTop />
       <Routes>
 
         {/* Public Routes */}
