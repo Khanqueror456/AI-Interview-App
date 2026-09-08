@@ -275,25 +275,28 @@ function StatCard({ icon, iconBg, label, value, trend, trendColor, delay = 0 }) 
   const cardRef = useRef(null);
   const numRef = useRef(null);
 
-  useEffect(() => {
-    const reduced = prefersReducedMotion();
+useEffect(() => {
+  const reduced = prefersReducedMotion();
 
-    animate(cardRef.current, {
-      opacity: [0, 1],
-      translateY: [14, 0],
-      duration: reduced ? 0 : 500,
-      delay: reduced ? 0 : delay,
-      ease: "outQuad",
-    });
+  animate(cardRef.current, {
+    opacity: [0, 1],
+    translateY: [14, 0],
+    duration: reduced ? 0 : 500,
+    delay: reduced ? 0 : delay,
+    ease: "outQuad",
+  });
 
-    animate(numRef.current, {
-      innerHTML: [0, value],
-      round: 1,
-      duration: reduced ? 0 : 800,
-      delay: reduced ? 0 : delay + 200,
-      ease: "outExpo",
-    });
-  }, [value, delay]);
+  const counter = { val: 0 };
+  animate(counter, {
+    val: value,
+    duration: reduced ? 0 : 800,
+    delay: reduced ? 0 : delay + 200,
+    ease: "outExpo",
+    onUpdate: () => {
+      numRef.current.innerHTML = Math.round(counter.val);
+    },
+  });
+}, [value, delay]);
 
   return (
     <div
@@ -320,34 +323,34 @@ function ScoreCard({ value, delay = 0 }) {
   const ringRef = useRef(null);
   const numRef = useRef(null);
 
-  useEffect(() => {
-    const reduced = prefersReducedMotion();
+useEffect(() => {
+  const reduced = prefersReducedMotion();
 
-    animate(cardRef.current, {
-      opacity: [0, 1],
-      translateY: [14, 0],
-      duration: reduced ? 0 : 500,
-      delay: reduced ? 0 : delay,
-      ease: "outQuad",
-    });
+  animate(cardRef.current, {
+    opacity: [0, 1],
+    translateY: [14, 0],
+    duration: reduced ? 0 : 500,
+    delay: reduced ? 0 : delay,
+    ease: "outQuad",
+  });
 
-    // Animate a plain proxy object so the ring gradient and the number
-    // stay perfectly in sync, driven by anime.js's onUpdate callback.
-    const proxy = { value: 0 };
-    animate(proxy, {
-      value,
-      round: 1,
-      duration: reduced ? 0 : 900,
-      delay: reduced ? 0 : delay + 200,
-      ease: "outExpo",
-      onUpdate: () => {
-        if (numRef.current) numRef.current.textContent = proxy.value;
-        if (ringRef.current) {
-          ringRef.current.style.background = `conic-gradient(#E8A33D ${proxy.value}%, #EDEEEA 0)`;
-        }
-      },
-    });
-  }, [value, delay]);
+  // Animate a plain proxy object so the ring gradient and the number
+  // stay perfectly in sync, driven by anime.js's onUpdate callback.
+  const proxy = { value: 0 };
+  animate(proxy, {
+    value,
+    duration: reduced ? 0 : 900,
+    delay: reduced ? 0 : delay + 200,
+    ease: "outExpo",
+    onUpdate: () => {
+      const rounded = Math.round(proxy.value);
+      if (numRef.current) numRef.current.textContent = rounded;
+      if (ringRef.current) {
+        ringRef.current.style.background = `conic-gradient(#E8A33D ${rounded}%, #EDEEEA 0)`;
+      }
+    },
+  });
+}, [value, delay]);
 
   return (
     <div
