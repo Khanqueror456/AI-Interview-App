@@ -1,5 +1,6 @@
 import { NavLink, Link } from "react-router-dom";
 import { Bell } from "lucide-react";
+import useAuth from "../../hooks/useAuth";
 
 /**
  * Shared navbar. Purely presentational — wire up auth/handlers via props.
@@ -20,11 +21,10 @@ export default function Navbar({
     { label : "Analyze resumes", to: "/resume/analyzer"},
     { label: "Resumes", to: "/resumes" },
   ],
-  user = { name: "Jordan Smith", initials: "JS" },
-  onCtaClick = () => {},
-  onBellClick = () => {},
   logoText = "cadence",
 }) {
+
+  const {user, logout} = useAuth();
   return (
     <nav className="flex items-center justify-between h-16 px-7 bg-white border-b border-[#D8D9D3]">
       <div className="flex items-center gap-10">
@@ -60,24 +60,17 @@ export default function Navbar({
       </div>
 
       <div className="flex items-center gap-[18px]">
-        <button
-          onClick={onBellClick}
-          aria-label="Notifications"
-          className="p-1.5 rounded-md text-[#6B7280] hover:text-[#14213D] hover:bg-[#EDEEEA] transition-colors duration-150"
-        >
-          <Bell size={19} strokeWidth={1.8} />
-        </button>
-
-        <button
-          onClick={onCtaClick}
-          className="bg-[#14213D] hover:bg-[#24304F] text-white text-sm font-medium px-[18px] py-[9px] rounded-[5px] transition-colors duration-150"
-        >
-          Start practice
-        </button>
 
         <div className="w-[34px] h-[34px] rounded-full bg-[#E8A33D] text-[#14213D] text-[13px] font-semibold flex items-center justify-center">
-          {user.initials}
+          {user?.name[0].toUpperCase()}
         </div>
+        <button
+          onClick={logout}
+          className="bg-[#14213D] hover:bg-[#24304F] text-white text-sm font-medium px-[18px] py-[9px] rounded-[5px] transition-colors duration-150"
+        >
+          Logout
+        </button>
+
       </div>
     </nav>
   );

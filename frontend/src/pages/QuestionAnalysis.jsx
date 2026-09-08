@@ -1,365 +1,338 @@
-import React, { useEffect, useState } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { getInterview, getQuestionAnalysis } from '../services/interviewService';
+import React, { useEffect, useState, useRef } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { getInterview, getQuestionAnalysis } from "../services/interviewService";
+import { animate, stagger } from "animejs";
+import {
+  ArrowLeft,
+  FileText,
+  Target,
+  CheckCircle,
+  User,
+  Sparkles,
+  Lightbulb,
+  ChevronLeft,
+  ChevronRight,
+  Home,
+  BarChart3,
+  HelpCircle,
+} from "lucide-react";
 
-const QuestionAnalysis = () => {
+function prefersReducedMotion() {
+  return (
+    typeof window !== "undefined" &&
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+  );
+}
 
+/**
+ * QuestionAnalysis – detailed review of a single interview question.
+ * Sections animate in with a staggered effect.
+ */
+export default function QuestionAnalysis() {
   const { id } = useParams();
-
   const [searchParams, setSearchParams] = useSearchParams();
-  const questionNumber =
-    Number(searchParams.get("question")) || 0;
+  const navigate = useNavigate();
 
+  const questionNumber = Number(searchParams.get("question")) || 0;
   const currentQuestionIndex = questionNumber - 1;
-
 
   const [questionAnalysis, setQuestionAnalysis] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [interview, setInterview] = useState(null);
-  const navigate = useNavigate();
 
-  const {
-    question,
-    answer,
-    feedback,
-    score,
-    idealAnswer
-  } = questionAnalysis;
+  const { question, answer, feedback, score, idealAnswer } = questionAnalysis;
+
+  // Refs for animated sections
+  const headerRef = useRef(null);
+  const questionRef = useRef(null);
+  const statsRef = useRef(null);
+  const answerRef = useRef(null);
+  const feedbackRef = useRef(null);
+  const idealRef = useRef(null);
+  const navRef = useRef(null);
 
   useEffect(() => {
-
     const fetchQuestionAnalysis = async () => {
-
       try {
-
-        const response = await getQuestionAnalysis(id, currentQuestionIndex);
-        setQuestionAnalysis(response.analysis);
-
-        const response2 = await getInterview(id);
-        setInterview(response2);
-
-      } catch (error) {
-
-        setError(error?.response?.data?.message || "Failed to load question analysis");
-
+        const [analysisRes, interviewRes] = await Promise.all([
+          getQuestionAnalysis(id, currentQuestionIndex),
+          getInterview(id),
+        ]);
+        setQuestionAnalysis(analysisRes.analysis);
+        setInterview(interviewRes);
+      } catch (err) {
+        setError(err?.response?.data?.message || "Failed to load question analysis");
       } finally {
-
         setLoading(false);
-
       }
-    }; fetchQuestionAnalysis();
+    };
+    fetchQuestionAnalysis();
   }, [id, currentQuestionIndex]);
 
+  // Animate sections on mount
+  useEffect(() => {
+    if (loading || error || !questionAnalysis || !interview) return;
+    const reduced = prefersReducedMotion();
+
+    const sections = [
+      headerRef,
+      questionRef,
+      statsRef,
+      answerRef,
+      feedbackRef,
+      idealRef,
+      navRef,
+    ].filter((ref) => ref.current);
+
+    animate(sections.map((ref) => ref.current), {
+      opacity: [0, 1],
+      translateY: [20, 0],
+      duration: reduced ? 0 : 500,
+      delay: reduced ? 0 : stagger(80, { start: 100 }),
+      ease: "outQuad",
+    });
+  }, [loading, error, questionAnalysis, interview]);
 
   const handleNext = () => {
-
-    setSearchParams({
-      question: String(questionNumber + 1)
-    });
-
+    setSearchParams({ question: String(questionNumber + 1) });
   };
 
   const handlePrevious = () => {
-
-    setSearchParams({
-        question: String(questionNumber - 1)
-    });
-
-};
+    setSearchParams({ question: String(questionNumber - 1) });
+  };
 
   const handleBackToReport = () => {
-    navigate(`/interviews/${id}/report`)
-  }
+    navigate(`/interviews/${id}/report`);
+  };
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950">
-        <div className="text-center">
-
-          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-700 border-t-indigo-500" />
-
-          <p className="mt-4 text-sm text-slate-400">
-            Loading question analysis...
-          </p>
-
-        </div>
-      </div>
-    );
+    return <LoadingSkeleton />;
   }
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4">
-
-        <div className="w-full max-w-md rounded-2xl border border-red-500/20 bg-slate-900 p-8 text-center">
-
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-500/10 text-xl text-red-400">
-            !
+      <div className="min-h-screen bg-[#F7F7F4] flex items-center justify-center px-4">
+        <div className="bg-white border border-[#D8D9D3] rounded-2xl p-8 max-w-md w-full text-center shadow-sm">
+          <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-red-500 text-2xl">!</span>
           </div>
-
-          <h2 className="mt-4 text-xl font-semibold text-white">
-            Unable to load analysis
-          </h2>
-
-          <p className="mt-2 text-sm text-slate-400">
-            {error}
-          </p>
-
+          <h2 className="text-xl font-semibold text-[#14213D]">Unable to load analysis</h2>
+          <p className="text-[#6B7280] mt-2">{error}</p>
           <button
             onClick={() => navigate(-1)}
-            className="mt-6 rounded-lg bg-indigo-600 px-5 py-3 font-medium text-white transition hover:bg-indigo-500"
+            className="mt-6 inline-flex items-center gap-2 px-5 py-2 bg-[#14213D] text-white rounded-lg hover:bg-[#24304F] transition-colors"
           >
-            Go Back
+            <ArrowLeft size={16} /> Go Back
           </button>
-
         </div>
-
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 px-4 py-8 sm:px-6">
-
-      <div className="mx-auto max-w-5xl">
-
-        {/* ================= HEADER ================= */}
-
-        <div className="mb-8">
-
+    <div className="min-h-screen bg-[#F7F7F4] py-10 px-4 sm:px-6">
+      <div className="max-w-4xl mx-auto">
+        {/* ===== HEADER ===== */}
+        <div ref={headerRef} style={{ opacity: 0 }} className="mb-8">
           <button
-            onClick={() => {handleBackToReport()}}
-            className="mb-5 text-sm text-slate-400 transition hover:text-white"
+            onClick={handleBackToReport}
+            className="inline-flex items-center gap-2 text-sm text-[#6B7280] hover:text-[#14213D] transition-colors mb-4"
           >
-            ← Back to Report
+            <ArrowLeft size={16} /> Back to Report
           </button>
 
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
-
-              <p className="text-sm font-medium uppercase tracking-wider text-indigo-400">
-                Question Analysis
+              <p className="text-sm font-medium uppercase tracking-wider text-[#E8A33D] flex items-center gap-2">
+                <BarChart3 size={16} /> Question Analysis
               </p>
-
-              <h1 className="mt-2 text-3xl font-bold text-white">
+              <h1 className="text-3xl font-bold text-[#14213D] font-['Lora',_Georgia,_serif]">
                 Detailed Answer Review
               </h1>
-
             </div>
-
-            {/* Question Number */}
-
-            <div className="rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-300">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#E7EAF3] text-[#14213D] rounded-full text-sm font-medium border border-[#D8D9D3]">
+              <HelpCircle size={16} />
               Question {currentQuestionIndex + 1}
             </div>
-
           </div>
-
         </div>
 
-
-        {/* ================= QUESTION ================= */}
-
-        <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6 sm:p-8">
-
-          <div className="mb-4 flex items-center justify-between">
-
-            <p className="text-sm font-medium uppercase tracking-wider text-indigo-400">
-              Interview Question
-            </p>
-
+        {/* ===== QUESTION ===== */}
+        <div
+          ref={questionRef}
+          style={{ opacity: 0 }}
+          className="bg-white border border-[#D8D9D3] rounded-2xl p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow mb-6"
+        >
+          <div className="flex items-center gap-2 text-sm text-[#6B7280] mb-3">
+            <HelpCircle size={16} className="text-[#E8A33D]" />
+            Interview Question
           </div>
-
-          <h2 className="text-xl font-semibold leading-relaxed text-white sm:text-2xl">
+          <h2 className="text-xl font-semibold text-[#14213D] leading-relaxed">
             {question}
           </h2>
+        </div>
 
-        </section>
-
-
-        {/* ================= SCORE ================= */}
-
-        <section className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-
-          {/* Score */}
-
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-
-            <p className="text-sm text-slate-400">
-              Score
+        {/* ===== STATS ===== */}
+        <div
+          ref={statsRef}
+          style={{ opacity: 0 }}
+          className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6"
+        >
+          <div className="bg-white border border-[#D8D9D3] rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+            <p className="text-sm text-[#6B7280] flex items-center gap-2">
+              <Target size={16} className="text-[#E8A33D]" /> Score
             </p>
-
-            <div className="mt-3 flex items-end gap-2">
-
-              <span className="text-4xl font-bold text-indigo-400">
-                {score}
-              </span>
-
-              <span className="mb-1 text-sm text-slate-500">
-                points
-              </span>
-
+            <div className="mt-2 flex items-end gap-1">
+              <span className="text-4xl font-bold text-[#14213D]">{score || 0}</span>
+              <span className="text-sm text-[#6B7280] mb-1">points</span>
             </div>
-
           </div>
-
-
-          {/* Question */}
-
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-
-            <p className="text-sm text-slate-400">
-              Question
+          <div className="bg-white border border-[#D8D9D3] rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+            <p className="text-sm text-[#6B7280] flex items-center gap-2">
+              <HelpCircle size={16} className="text-[#6B7280]" /> Question
             </p>
-
-            <p className="mt-3 text-4xl font-bold text-white">
+            <p className="mt-2 text-4xl font-bold text-[#14213D]">
               {currentQuestionIndex + 1}
             </p>
-
           </div>
-
-
-          {/* Status */}
-
-          <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
-
-            <p className="text-sm text-slate-400">
-              Evaluation
+          <div className="bg-white border border-[#D8D9D3] rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+            <p className="text-sm text-[#6B7280] flex items-center gap-2">
+              <CheckCircle size={16} className="text-[#3B7A57]" /> Evaluation
             </p>
-
-            <div className="mt-3 flex items-center gap-2">
-
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-
-              <span className="font-medium text-emerald-400">
-                Evaluated
-              </span>
-
+            <div className="mt-2 flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#3B7A57]" />
+              <span className="font-medium text-[#3B7A57]">Evaluated</span>
             </div>
-
           </div>
+        </div>
 
-        </section>
-
-
-        {/* ================= YOUR ANSWER ================= */}
-
-        <section className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 p-6 sm:p-8">
-
-          <div className="mb-5">
-
-            <p className="text-sm font-medium uppercase tracking-wider text-slate-400">
-              Your Answer
-            </p>
-
-            <h2 className="mt-1 text-xl font-semibold text-white">
-              What you submitted
-            </h2>
-
+        {/* ===== YOUR ANSWER ===== */}
+        <div
+          ref={answerRef}
+          style={{ opacity: 0 }}
+          className="bg-white border border-[#D8D9D3] rounded-2xl p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow mb-6"
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <User size={18} className="text-[#14213D]" />
+            <div>
+              <p className="text-sm font-medium uppercase tracking-wider text-[#6B7280]">Your Answer</p>
+              <p className="text-sm text-[#6B7280]">What you submitted</p>
+            </div>
           </div>
-
-          <div className="rounded-xl border border-slate-700/50 bg-slate-800/50 p-5">
-
-            <p className="whitespace-pre-wrap leading-7 text-slate-300">
+          <div className="bg-[#F7F7F4] rounded-xl p-5 border border-[#D8D9D3]">
+            <p className="whitespace-pre-wrap leading-7 text-[#14213D]">
               {answer || "No answer was provided."}
             </p>
-
           </div>
+        </div>
 
-        </section>
-
-
-        {/* ================= AI FEEDBACK ================= */}
-
-        <section className="mt-6 rounded-2xl border border-indigo-500/20 bg-slate-900 p-6 sm:p-8">
-
-          <div className="mb-5">
-
-            <p className="text-sm font-medium uppercase tracking-wider text-indigo-400">
-              AI Feedback
-            </p>
-
-            <h2 className="mt-1 text-xl font-semibold text-white">
-              Evaluation of your answer
-            </h2>
-
+        {/* ===== AI FEEDBACK ===== */}
+        <div
+          ref={feedbackRef}
+          style={{ opacity: 0 }}
+          className="bg-white border border-[#E8A33D]/30 rounded-2xl p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow mb-6"
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <Sparkles size={18} className="text-[#E8A33D]" />
+            <div>
+              <p className="text-sm font-medium uppercase tracking-wider text-[#E8A33D]">AI Feedback</p>
+              <p className="text-sm text-[#6B7280]">Evaluation of your answer</p>
+            </div>
           </div>
-
-          <div className="rounded-xl border border-indigo-500/10 bg-indigo-500/5 p-5">
-
-            <p className="whitespace-pre-wrap leading-7 text-slate-300">
+          <div className="bg-[#FBF7F0] rounded-xl p-5 border border-[#E8A33D]/20">
+            <p className="whitespace-pre-wrap leading-7 text-[#14213D]">
               {feedback}
             </p>
-
           </div>
+        </div>
 
-        </section>
-
-
-        {/* ================= IDEAL ANSWER ================= */}
-
-        <section className="mt-6 rounded-2xl border border-emerald-500/20 bg-slate-900 p-6 sm:p-8">
-
-          <div className="mb-5">
-
-            <p className="text-sm font-medium uppercase tracking-wider text-emerald-400">
-              Ideal Answer
-            </p>
-
-            <h2 className="mt-1 text-xl font-semibold text-white">
-              What a strong answer could look like
-            </h2>
-
+        {/* ===== IDEAL ANSWER ===== */}
+        <div
+          ref={idealRef}
+          style={{ opacity: 0 }}
+          className="bg-white border border-[#3B7A57]/30 rounded-2xl p-6 sm:p-8 shadow-sm hover:shadow-md transition-shadow mb-6"
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <Lightbulb size={18} className="text-[#3B7A57]" />
+            <div>
+              <p className="text-sm font-medium uppercase tracking-wider text-[#3B7A57]">Ideal Answer</p>
+              <p className="text-sm text-[#6B7280]">What a strong answer could look like</p>
+            </div>
           </div>
-
-          <div className="rounded-xl border border-emerald-500/10 bg-emerald-500/5 p-5">
-
-            <p className="whitespace-pre-wrap leading-7 text-slate-300">
+          <div className="bg-[#F0F7F4] rounded-xl p-5 border border-[#3B7A57]/20">
+            <p className="whitespace-pre-wrap leading-7 text-[#14213D]">
               {idealAnswer}
             </p>
-
           </div>
+        </div>
 
-        </section>
-
-
-        {/* ================= NAVIGATION ================= */}
-
-        <div className="mt-8 flex items-center justify-between gap-4">
-
+        {/* ===== NAVIGATION ===== */}
+        <div
+          ref={navRef}
+          style={{ opacity: 0 }}
+          className="flex flex-wrap items-center justify-between gap-4 mt-8"
+        >
           <button
             onClick={handlePrevious}
             disabled={currentQuestionIndex === 0}
-            className="rounded-lg border border-slate-700 px-5 py-3 font-medium text-slate-300 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex items-center gap-2 px-5 py-3 border border-[#D8D9D3] rounded-lg text-[#14213D] font-medium hover:bg-[#F7F7F4] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            ← Previous
+            <ChevronLeft size={18} /> Previous
           </button>
-
 
           <button
-            onClick={() => {handleBackToReport()}}
-            className="hidden rounded-lg border border-slate-700 px-5 py-3 font-medium text-slate-300 transition hover:bg-slate-800 sm:block"
+            onClick={handleBackToReport}
+            className="inline-flex items-center gap-2 px-5 py-3 border border-[#D8D9D3] rounded-lg text-[#14213D] font-medium hover:bg-[#F7F7F4] transition-colors hidden sm:flex"
           >
-            Back to Report
+            <Home size={18} /> Back to Report
           </button>
-
 
           <button
             onClick={handleNext}
-            className="rounded-lg bg-indigo-600 disabled:bg-indigo-600/40 disabled:text-white/40 px-5 py-3 font-medium text-white transition hover:bg-indigo-500"
-            disabled={currentQuestionIndex === interview?.questions?.length - 1}
+            disabled={currentQuestionIndex === (interview?.questions?.length || 0) - 1}
+            className="inline-flex items-center gap-2 px-5 py-3 bg-[#14213D] text-white rounded-lg font-medium hover:bg-[#24304F] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            Next →
+            Next <ChevronRight size={18} />
           </button>
-
         </div>
-
       </div>
-
     </div>
   );
 }
 
-export default QuestionAnalysis;
+// ===== Loading Skeleton =====
+const LoadingSkeleton = () => (
+  <div className="min-h-screen bg-[#F7F7F4] py-10 px-4 sm:px-6">
+    <div className="max-w-4xl mx-auto animate-pulse">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="w-32 h-4 bg-[#D8D9D3] rounded mb-4" />
+        <div className="w-64 h-8 bg-[#D8D9D3] rounded" />
+        <div className="w-48 h-6 bg-[#D8D9D3] rounded mt-2" />
+      </div>
+
+      {/* Question card */}
+      <div className="bg-white border border-[#D8D9D3] rounded-2xl p-6 sm:p-8 mb-6 h-32" />
+
+      {/* Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="bg-white border border-[#D8D9D3] rounded-2xl p-5 h-24" />
+        ))}
+      </div>
+
+      {/* Answer, Feedback, Ideal */}
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="bg-white border border-[#D8D9D3] rounded-2xl p-6 sm:p-8 mb-6 h-48" />
+      ))}
+
+      {/* Navigation */}
+      <div className="flex justify-between">
+        <div className="w-28 h-12 bg-[#D8D9D3] rounded-lg" />
+        <div className="w-40 h-12 bg-[#D8D9D3] rounded-lg hidden sm:block" />
+        <div className="w-28 h-12 bg-[#D8D9D3] rounded-lg" />
+      </div>
+    </div>
+  </div>
+);
