@@ -65,7 +65,7 @@ export default function Login() {
             <Sparkles size={28} strokeWidth={1.8} />
           </div>
           <h1 className="text-3xl font-bold text-[#14213D] font-['Lora',_Georgia,_serif]">
-            AI Interview
+            SkillSync
           </h1>
           <p className="text-[#6B7280] mt-1 text-sm">Practice. Improve. Get hired.</p>
         </div>

@@ -1,6 +1,7 @@
 import { NavLink, Link } from "react-router-dom";
 import { Bell } from "lucide-react";
 import useAuth from "../../hooks/useAuth";
+import SkillSyncLogo from "../common/SkillSyncLogo"
 
 /**
  * Shared navbar. Purely presentational — wire up auth/handlers via props.
@@ -17,22 +18,26 @@ export default function Navbar({
   links = [
     { label: "Dashboard", to: "/" },
     { label: "Practice", to: "/interviews/create" },
-    { label : "Interviews", to: "/interviews"},
-    { label : "Analyze resumes", to: "/resume/analyzer"},
+    { label: "Interviews", to: "/interviews" },
+    { label: "Analyze resumes", to: "/resume/analyzer" },
     { label: "Resumes", to: "/resumes" },
   ],
-  logoText = "cadence",
+  logoText = "SkillSync",
 }) {
 
-  const {user, logout} = useAuth();
+  const { user, logout } = useAuth();
   return (
     <nav className="flex items-center justify-between h-16 px-7 bg-white border-b border-[#D8D9D3]">
       <div className="flex items-center gap-10">
-        <Link
+        {/* <Link
           to="/"
           className="text-[21px] font-semibold text-[#14213D] tracking-tight font-['Lora',_Georgia,_serif] no-underline"
         >
           {logoText}
+        </Link> */}
+
+        <Link to="/" className="no-underline">
+          <SkillSyncLogo textColor="text-[#14213D]" iconColor="#E8A33D" animationDuration={5000} />
         </Link>
 
         <ul className="flex gap-7 list-none m-0 p-0">
