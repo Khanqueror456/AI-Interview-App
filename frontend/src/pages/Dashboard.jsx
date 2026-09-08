@@ -51,8 +51,8 @@ export default function Dashboard({
 
   useEffect(() => {
 
-    // console.log(jobsMatch);
-  }, [jobsMatch]);
+    console.log(interviews);
+  }, [interviews]);
 
 
   useEffect(() => {
@@ -112,7 +112,7 @@ export default function Dashboard({
 
     const allMatches = jobsMatch?.flatMap(item => item.jobMatches).sort((a, b) => b - a);
     console.log("This is allMatches", allMatches);
-    setProcessedJobMatches(allMatches.slice(0,3));
+    setProcessedJobMatches(allMatches);
 
   }, [jobsMatch]);
 
@@ -137,10 +137,8 @@ export default function Dashboard({
     let totalScore = 0;
     let count = 0;
 
-    for (let interview of interviews)
-    {
-      if (interview.status == "completed" )
-      {
+    for (let interview of interviews) {
+      if (interview.status == "completed") {
         totalScore += interview.score;
         // console.log(interview.score)
         count++;
@@ -169,7 +167,7 @@ export default function Dashboard({
   }
 
   if (error) {
-    return <ErrorScreen body={error}/>
+    return <ErrorScreen body={error} />
   }
 
   return (
@@ -201,7 +199,7 @@ export default function Dashboard({
           iconBg="bg-[#E3F0E8]"
           icon={<CheckCircle2 size={18} strokeWidth={1.8} className="text-[#3B7A57]" />}
           label="Completed"
-          value={ getCompletedInterviews()}
+          value={getCompletedInterviews()}
           trend="+2 this week"
           trendColor="text-[#3B7A57]"
         />
@@ -221,9 +219,11 @@ export default function Dashboard({
         <FadeInCard delay={360} className="p-6">
           <p className="text-[15px] font-semibold text-[#14213D] m-0">Your performance</p>
           <p className="text-[13px] text-[#6B7280] mt-1 mb-5">
-            Score trend across your last {performanceTrend.length} interviews
+            Score trend across your last {5} interviews
           </p>
-          <Sparkline data={performanceTrend} />
+          <Sparkline data={interviews?.map((item) => {
+            return { label: item.targetRole || "N/A", value: item.score || 0 }
+          }).slice(0, 5)} />
         </FadeInCard>
 
         {/* Job matches teaser */}
@@ -231,12 +231,12 @@ export default function Dashboard({
           <div className="flex items-center justify-between mb-4">
             <p className="text-[15px] font-semibold text-[#14213D] m-0">Job matches</p>
             <span className="text-[12px] font-medium text-[#3B7A57] bg-[#E3F0E8] px-2 py-0.5 rounded-full">
-              {processedJobMatches?.length} new
+              {processedJobMatches?.slice(0, 3)?.length} new
             </span>
           </div>
 
           <div className="flex flex-col gap-1">
-            {processedJobMatches?.map((job, i) => (
+            {processedJobMatches?.slice(0, 3)?.map((job, i) => (
               <Link to={`${job.applyUrl}`} target="blank"><JobMatchRow key={job.jobId} job={job} index={i} /></Link>
             ))}
           </div>
@@ -423,33 +423,46 @@ function JobMatchRow({ job, index }) {
  * Lightweight, dependency-free trend line (no chart lib assumed). Line draw-in
  * uses anime.js v4's svg.createDrawable(); dot pop-in uses stagger().
  */
+
 function Sparkline({ data }) {
-  const width = 100;
-  const height = 40;
+  if (!data || data.length === 0) return null;
+
+  const width = 300;
+  const height = 100;
+  const padding = 8;
   const lineRef = useRef(null);
   const dotsWrapRef = useRef(null);
+  const [hoveredIndex, setHoveredIndex] = useState(null);
 
   const max = Math.max(...data.map((d) => d.value));
   const min = Math.min(...data.map((d) => d.value));
   const range = max - min || 1;
 
   const coords = data.map((d, i) => {
-    const x = (i / (data.length - 1)) * width;
-    const y = height - ((d.value - min) / range) * height;
+    const x = data.length > 1
+      ? padding + (i / (data.length - 1)) * (width - padding * 2)
+      : width / 2;
+    const y = padding + (height - padding * 2) - ((d.value - min) / range) * (height - padding * 2);
     return { x, y };
   });
 
-  const linePoints = coords.map((c) => `${c.x},${c.y}`).join(" ");
-  const areaPoints = `0,${height} ${linePoints} ${width},${height}`;
+  const linePath = coords.reduce((acc, c, i) => {
+    if (i === 0) return `M ${c.x},${c.y}`;
+    const prev = coords[i - 1];
+    const midX = (prev.x + c.x) / 2;
+    return `${acc} C ${midX},${prev.y} ${midX},${c.y} ${c.x},${c.y}`;
+  }, "");
+
+  const areaPath = `${linePath} L ${coords[coords.length - 1].x},${height} L ${coords[0].x},${height} Z`;
 
   const last = data[data.length - 1].value;
   const first = data[0].value;
   const isUp = last >= first;
-  const stroke = isUp ? "#3B7A57" : "#C24444";
+  const stroke = isUp ? "#2F855A" : "#C24444";
+  const gradientId = `sparkline-gradient-${isUp ? "up" : "down"}`;
 
   useEffect(() => {
     const reduced = prefersReducedMotion();
-
     const [drawable] = svg.createDrawable(lineRef.current);
     animate(drawable, {
       draw: reduced ? "0 1" : ["0 0", "0 1"],
@@ -457,7 +470,6 @@ function Sparkline({ data }) {
       delay: reduced ? 0 : 250,
       ease: "inOutSine",
     });
-
     animate(dotsWrapRef.current.querySelectorAll(".spark-dot"), {
       scale: [0, 1],
       opacity: [0, 1],
@@ -467,25 +479,31 @@ function Sparkline({ data }) {
     });
   }, []);
 
+  const hovered = hoveredIndex !== null ? { point: data[hoveredIndex], coord: coords[hoveredIndex] } : null;
+
   return (
-    <div>
-      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-16" preserveAspectRatio="none">
+    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+      <svg viewBox={`0 0 ${width} ${height}`} width="100%" height="100%" style={{ overflow: "visible" }}>
         <defs>
-          <linearGradient id="sparklineFill" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={stroke} stopOpacity="0.25" />
             <stop offset="100%" stopColor={stroke} stopOpacity="0" />
           </linearGradient>
         </defs>
-        <polygon points={areaPoints} fill="url(#sparklineFill)" />
-        <polyline
+
+        <path d={areaPath} fill={`url(#${gradientId})`} stroke="none" />
+
+        <path
           ref={lineRef}
-          points={linePoints}
+          d={linePath}
           fill="none"
           stroke={stroke}
-          strokeWidth="2"
+          strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
+          vectorEffect="non-scaling-stroke"
         />
+
         <g ref={dotsWrapRef}>
           {coords.map((c, i) => (
             <circle
@@ -493,17 +511,68 @@ function Sparkline({ data }) {
               className="spark-dot"
               cx={c.x}
               cy={c.y}
-              r="2.2"
-              fill={stroke}
-              style={{ opacity: 0, transformOrigin: "center", transformBox: "fill-box" }}
+              r={hoveredIndex === i ? 5 : 3.5}
+              fill="#fff"
+              stroke={stroke}
+              strokeWidth="2"
+              vectorEffect="non-scaling-stroke"
+              style={{ transition: "r 120ms ease" }}
             />
           ))}
         </g>
+
+        {/* Invisible larger hit targets for easier hover */}
+        {coords.map((c, i) => (
+          <circle
+            key={`hit-${i}`}
+            cx={c.x}
+            cy={c.y}
+            r={14}
+            fill="transparent"
+            onMouseEnter={() => setHoveredIndex(i)}
+            onMouseLeave={() => setHoveredIndex(null)}
+            style={{ cursor: "pointer" }}
+          />
+        ))}
+
+        {/* Vertical guide line on hover */}
+        {hovered && (
+          <line
+            x1={hovered.coord.x}
+            y1={padding}
+            x2={hovered.coord.x}
+            y2={height - padding}
+            stroke={stroke}
+            strokeWidth="1"
+            strokeDasharray="3,3"
+            opacity="0.4"
+          />
+        )}
       </svg>
-      <div className="flex justify-between mt-2">
-        <span className="text-[12px] text-[#6B7280]">{data[0].label}</span>
-        <span className="text-[12px] text-[#6B7280]">{data[data.length - 1].label}</span>
-      </div>
+
+      {hovered && (
+        <div
+          style={{
+            position: "absolute",
+            left: `${(hovered.coord.x / width) * 100}%`,
+            top: `${(hovered.coord.y / height) * 100}%`,
+            transform: "translate(-50%, -130%)",
+            background: "#1A202C",
+            color: "#fff",
+            padding: "6px 10px",
+            borderRadius: "6px",
+            fontSize: "12px",
+            lineHeight: 1.3,
+            whiteSpace: "nowrap",
+            pointerEvents: "none",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+            zIndex: 10,
+          }}
+        >
+          <div style={{ fontWeight: 600 }}>{hovered.point.label}</div>
+          <div style={{ opacity: 0.85 }}>Score: {hovered.point.value}</div>
+        </div>
+      )}
     </div>
   );
 }
