@@ -1,5 +1,6 @@
 import {Navigate, Outlet} from "react-router-dom";
 import useAuth from "../hooks/useAuth";
+import LoadingScreen from "../components/layout/LoadingScreen";
 
 
 const ProtectedRoute = () => {
@@ -8,7 +9,7 @@ const ProtectedRoute = () => {
 
     if (loading)
     {
-        return <h1>Loading...</h1>
+        return <LoadingScreen />;
     }
 
     if (!user)
