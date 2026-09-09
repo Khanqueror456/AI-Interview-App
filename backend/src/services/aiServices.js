@@ -1,31 +1,18 @@
 import ollama from "ollama";
 
+import Groq from 'groq-sdk';
+
+const groq = new Groq({
+    apiKey: process.env.GROQ_API_KEY,
+});
+
 export const generateInterviewQuestions = async (
     role,
     experience,
     difficulty,
     totalQuestions
 ) => {
-    //     const prompt = `
-    // Generate ${totalQuestions} interview questions.
 
-    // Role: ${role}
-
-    // Experience Level: ${experience}
-
-    // Difficulty: ${difficulty}
-
-    // Return ONLY a JSON array.
-
-    // Example:
-
-    // [
-    //   {
-    //     "question": "What is React?"
-    //   }
-    // ]
-    //   Follow the format given above strictly for questions.
-    // `;
 
     const prompt = `
 Generate exactly ${totalQuestions} technical interview questions.
@@ -46,47 +33,84 @@ Requirements:
 - Do not include markdown.
 - Return ONLY valid JSON.
 
-Return the response in the following format exactly:
 
-[
-  {
-    "question": "What is React?"
-  },
-  {
-    "question": "Explain the Virtual DOM."
-  }
-]
+Return the result as a JSON object in exactly this shape:
+
+{ "questions": [ { "question": "..." }, { "question": "..." } ] };
 
 Do not return any text before or after the JSON array.
 `;
 
-    const response = await ollama.chat({
-        model: "qwen3:8b",
-        format: {
-            type: "array",
-            items: {
-                type: "object",
-                properties: {
-                    question: {
-                        type: "string"
-                    }
-                },
-                required: ["question"]
-            }
-        },
+    // const response = await ollama.chat({
+    //     model: "qwen3:8b",
+    //     format: {
+    //         type: "array",
+    //         items: {
+    //             type: "object",
+    //             properties: {
+    //                 question: {
+    //                     type: "string"
+    //                 }
+    //             },
+    //             required: ["question"]
+    //         }
+    //     },
+    //     messages: [
+    //         {
+    //             role: "user",
+    //             content: prompt
+    //         }
+    //     ]
+    // })
+
+    // const content = response.message.content;
+
+    // const questions = JSON.parse(content);
+
+    // return questions;
+
+    const response = await groq.chat.completions.create({
+        model: 'openai/gpt-oss-20b', // structured outputs supported models: gpt-oss-20b, gpt-oss-120b, llama-3.3-70b-versatile, etc.
         messages: [
             {
-                role: "user",
-                content: prompt
-            }
-        ]
-    })
+                role: 'user',
+                content: prompt,
+            },
+        ],
+        response_format: {
+            type: 'json_schema',
+            json_schema: {
+                name: 'question_list',
+                strict: true,
+                schema: {
+                    type: 'object', // Groq requires the root schema to be an object (unlike Ollama's raw array)
+                    properties: {
+                        questions: {
+                            type: 'array',
+                            items: {
+                                type: 'object',
+                                properties: {
+                                    question: {
+                                        type: 'string',
+                                    },
+                                },
+                                required: ['question'],
+                                additionalProperties: false,
+                            },
+                        },
+                    },
+                    required: ['questions'],
+                    additionalProperties: false,
+                },
+            },
+        },
+    });
 
-    const content = response.message.content;
+    const content = response.choices[0].message.content;
+    const parsed = JSON.parse(content);
 
-    const questions = JSON.parse(content);
+    return parsed.questions; // array of { question: string }
 
-    return questions;
 }
 
 export const getAnswerFeedback = async (question, answer, role, experience, difficulty) => {
@@ -131,18 +155,35 @@ export const getAnswerFeedback = async (question, answer, role, experience, diff
     Do not include markdown, code blocks, or any extra text.
     `;
 
-    const response = await ollama.chat({
-        model: "qwen3:8b",
-        format: "json",
+    // const response = await ollama.chat({
+    //     model: "qwen3:8b",
+    //     format: "json",
+    //     messages: [
+    //         {
+    //             role: "user",
+    //             content: prompt
+    //         }
+    //     ]
+    // })
+
+    // const text = response.message.content;
+
+    // const feedback = JSON.parse(text);
+
+    // return feedback;
+
+    const response = await groq.chat.completions.create({
+        model: "openai/gpt-oss-20b", // any Groq model works with json_object mode
+        response_format: { type: "json_object" }, // equivalent to Ollama's format: "json"
         messages: [
             {
                 role: "user",
                 content: prompt
             }
         ]
-    })
+    });
 
-    const text = response.message.content;
+    const text = response.choices[0].message.content;
 
     const feedback = JSON.parse(text);
 
@@ -195,20 +236,38 @@ export const getSkillBreakdown = async (interview) => {
         Quesions are ${questions}
         `
 
-    const response = await ollama.chat({
-        model: "qwen3:8b",
-        format: "json",
+    // const response = await ollama.chat({
+    //     model: "qwen3:8b",
+    //     format: "json",
+    //     messages: [
+    //         {
+    //             role: "user",
+    //             content: prompt
+    //         }
+    //     ]
+    // })
+
+    // const text = response.message.content;
+
+    // const skillBreakdown = JSON.parse(text);
+
+
+    const response = await groq.chat.completions.create({
+        model: "openai/gpt-oss-20b", // any Groq model works with json_object mode
+        response_format: { type: "json_object" }, // equivalent to Ollama's format: "json"
         messages: [
             {
                 role: "user",
                 content: prompt
             }
         ]
-    })
+    });
 
-    const text = response.message.content;
+    const text = response.choices[0].message.content;
 
     const skillBreakdown = JSON.parse(text);
+
+    console.log("This is skill break down",skillBreakdown);
 
     return skillBreakdown;
 }
