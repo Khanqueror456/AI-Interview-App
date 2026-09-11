@@ -3,7 +3,7 @@ import path from "path";
 import fs from "fs";
 
 
-const uploadDirectory = "src/uploads/resumes";
+const uploadDirectory = "uploads/resumes";
 
 if (!fs.existsSync(uploadDirectory)) {
     fs.mkdirSync(uploadDirectory, {
