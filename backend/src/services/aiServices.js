@@ -1,10 +1,6 @@
 import ollama from "ollama";
 
-import Groq from 'groq-sdk';
-
-const groq = new Groq({
-    apiKey: process.env.GROQ_API_KEY,
-});
+import groq from "../config/groq.js"
 
 export const generateInterviewQuestions = async (
     role,

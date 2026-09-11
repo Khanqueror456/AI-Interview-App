@@ -1,6 +1,7 @@
 import fs from "fs";
 import { PDFParse } from "pdf-parse";
 import ollama from "ollama";
+import groq from "../config/groq.js";
 
 export const extractResumeText = async (filePath) => {
 
@@ -93,9 +94,24 @@ Resume:
 ${resumeText}
 `;
 
-    const response = await ollama.chat({
-        model: "qwen3:8b",
-        format: "json",
+    // const response = await ollama.chat({
+    //     model: "qwen3:8b",
+    //     format: "json",
+    //     messages: [
+    //         {
+    //             role: "user",
+    //             content: prompt
+    //         }
+    //     ]
+    // });
+
+    // const text = response.message.content;
+
+    // const parsedData = JSON.parse(text);
+
+    const response = await groq.chat.completions.create({
+        model: "openai/gpt-oss-20b", // any Groq model works with json_object mode
+        response_format: { type: "json_object" }, // equivalent to Ollama's format: "json"
         messages: [
             {
                 role: "user",
@@ -104,7 +120,7 @@ ${resumeText}
         ]
     });
 
-    const text = response.message.content;
+    const text = response.choices[0].message.content;
 
     const parsedData = JSON.parse(text);
 
@@ -157,9 +173,25 @@ export const analyzeResumeWithAI = async (parsedData) => {
         `;
 
 
-    const response = await ollama.chat({
-        model: "qwen3:8b",
-        format: "json",
+    // const response = await ollama.chat({
+    //     model: "qwen3:8b",
+    //     format: "json",
+    //     messages: [
+    //         {
+    //             role: "user",
+    //             content: prompt
+    //         }
+    //     ]
+    // });
+
+    // const text = response.message.content;
+
+    // const analysis = JSON.parse(text);
+
+
+    const response = await groq.chat.completions.create({
+        model: "openai/gpt-oss-20b", // any Groq model works with json_object mode
+        response_format: { type: "json_object" }, // equivalent to Ollama's format: "json"
         messages: [
             {
                 role: "user",
@@ -168,7 +200,7 @@ export const analyzeResumeWithAI = async (parsedData) => {
         ]
     });
 
-    const text = response.message.content;
+    const text = response.choices[0].message.content;
 
     const analysis = JSON.parse(text);
 

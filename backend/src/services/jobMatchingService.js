@@ -1,4 +1,5 @@
 import ollama from "ollama";
+import groq from "../config/groq.js";
 
 const calculateJobMatch = async (candidateFeatures, jobFeatures) => {
 
@@ -43,7 +44,6 @@ JOBS:
 
 ${JSON.stringify(jobsForLLM, null, 2)}
 `;
-
     const jobMatchSchema = {
         type: "object",
 
@@ -61,7 +61,6 @@ ${JSON.stringify(jobsForLLM, null, 2)}
                     type: "object",
 
                     properties: {
-
                         jobIndex: {
                             type: "integer",
                             minimum: 0
@@ -107,7 +106,9 @@ ${JSON.stringify(jobsForLLM, null, 2)}
                                 "matched",
                                 "missing",
                                 "reason"
-                            ]
+                            ],
+
+                            additionalProperties: false
                         },
 
                         roleMatch: {
@@ -128,7 +129,9 @@ ${JSON.stringify(jobsForLLM, null, 2)}
                             required: [
                                 "score",
                                 "reason"
-                            ]
+                            ],
+
+                            additionalProperties: false
                         },
 
                         experienceMatch: {
@@ -149,7 +152,9 @@ ${JSON.stringify(jobsForLLM, null, 2)}
                             required: [
                                 "score",
                                 "reason"
-                            ]
+                            ],
+
+                            additionalProperties: false
                         },
 
                         summary: {
@@ -164,7 +169,9 @@ ${JSON.stringify(jobsForLLM, null, 2)}
                         "roleMatch",
                         "experienceMatch",
                         "summary"
-                    ]
+                    ],
+
+                    additionalProperties: false
                 }
             }
         },
@@ -172,13 +179,37 @@ ${JSON.stringify(jobsForLLM, null, 2)}
         required: [
             "overallRelevance",
             "jobMatches"
-        ]
+        ],
+
+        additionalProperties: false
     };
 
-    const response = await ollama.chat({
-        model: "qwen3:8b",
+    // const response = await ollama.chat({
+    //     model: "qwen3:8b",
 
-        format: jobMatchSchema,
+    //     format: jobMatchSchema,
+
+    //     messages: [
+    //         {
+    //             role: "user",
+    //             content: prompt
+    //         }
+    //     ]
+    // });
+
+    // const result = JSON.parse(response.message.content);
+
+    const response = await groq.chat.completions.create({
+        model: "openai/gpt-oss-20b",
+
+        response_format: {
+            type: "json_schema",
+            json_schema: {
+                name: "job_match",
+                strict: true,
+                schema: jobMatchSchema
+            }
+        },
 
         messages: [
             {
@@ -188,7 +219,9 @@ ${JSON.stringify(jobsForLLM, null, 2)}
         ]
     });
 
-    const result = JSON.parse(response.message.content);
+    const text = response.choices[0].message.content;
+
+    const result = JSON.parse(text);
 
     /*
      * Construct the final result using YOUR original job data.
