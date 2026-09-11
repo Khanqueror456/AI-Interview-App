@@ -20,6 +20,8 @@ app.use(cors({
   credentials: true
 }));
 
+console.log("This is the frontend URL",process.env.FRONTEND_URL);
+
 console.log("Current working directory:", process.cwd());
 console.log(
     "Uploads path:",
