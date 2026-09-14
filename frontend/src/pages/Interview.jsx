@@ -367,10 +367,10 @@ const Interview = () => {
     URL.revokeObjectURL(audioURL);
   }
 
-  const getAudioUrl = (audioPath) => {
+  // const getAudioUrl = (audioPath) => {
 
-    return `${import.meta.env.VITE_BACKEND_URL}${audioPath}`;
-  };
+  //   return `${import.meta.env.VITE_BACKEND_URL}${audioPath}`;
+  // };
 
 
   if (!interview) {
@@ -671,7 +671,7 @@ const Interview = () => {
 
             <div className="flex items-center justify-center gap-3">
 
-              <AudioPlayer audioUrl={getAudioUrl(interview?.questions?.[currentIndex]?.audio?.url)} />
+              <AudioPlayer audioUrl={interview?.questions?.[currentIndex]?.audio?.url} />
 
               {/* Mic controls */}
               <div className="relative flex items-center justify-center">
