@@ -59,7 +59,7 @@ export const login = asyncHandler(async (req, res) => {
         return res.status(404).json({ message: "User not found..." })
     }
 
-    console.log(password, user);
+    console.log(user);
 
     const isMatch = await bcrypt.compare(password, user.password);
 
@@ -67,7 +67,7 @@ export const login = asyncHandler(async (req, res) => {
         return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const token = await jwt.sign(
+    const token = jwt.sign(
         {
             userId: user._id,
         },
@@ -80,7 +80,7 @@ export const login = asyncHandler(async (req, res) => {
     res.cookie("token", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: "none",
         maxAge: 1 * 24 * 60 * 60 * 1000
     })
 
