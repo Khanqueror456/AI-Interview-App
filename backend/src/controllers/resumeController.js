@@ -3,6 +3,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 import { analyzeResumeWithAI, extractResumeText, parseResumeWithAI } from "../services/resumeService.js";
 import normalizeResume from "../services/resumeNormalizationService.js";
 import extractCandidateFeatures from "../services/candidateFeatureService.js";
+import uploadToCloudinary from "../utils/uploadToCloudinary.js";
 
 
 // export const uploadResume = asyncHandler(async (req, res) => {
