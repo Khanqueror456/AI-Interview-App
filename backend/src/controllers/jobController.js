@@ -119,9 +119,9 @@ export const getJobsMatchByUserId = asyncHandler(async (req, res) => {
         candidateId: userId,
     }) || [];
 
-    if (jobsMatches.length == 0) {
-        return res.status(404).json({ message: "No job matches found" });
-    }
+    // if (jobsMatches.length == 0) {
+    //     return res.status(200).json({ message: "No job matches found" });
+    // }
 
     return res.status(200).json(jobsMatches);
 
