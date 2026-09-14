@@ -14,6 +14,8 @@ import resumeRoutes from "./routes/resumeRoutes.js";
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 app.use(cors({
   origin: [process.env.FRONTEND_URL, 'http://localhost:5173'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -32,10 +34,7 @@ app.use("/uploads", express.static(
     path.join(process.cwd(), "uploads")
 ));
 
-// app.use(cors({
-//     origin : "http://localhost:5173",
-//     credentials : true
-// }));
+
 app.use(helmet());
 app.use(express.json());
 app.use(cookieParser());
