@@ -8,13 +8,30 @@ const resumeSchema = new mongoose.Schema(
             required: true
         },
 
+        // originalFile: {
+        //     filename: {
+        //         type: String,
+        //         required: true
+        //     },
+
+        //     path: {
+        //         type: String,
+        //         required: true
+        //     }
+        // },
+
         originalFile: {
             filename: {
                 type: String,
                 required: true
             },
 
-            path: {
+            url: {
+                type: String,
+                required: true
+            },
+
+            publicId: {
                 type: String,
                 required: true
             }
@@ -67,7 +84,7 @@ const resumeSchema = new mongoose.Schema(
 
             skills: [String],
 
-            achievements : [String],
+            achievements: [String],
 
             certifications: [String],
 
