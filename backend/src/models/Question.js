@@ -17,9 +17,9 @@ const QuestionSchema = new mongoose.Schema({
         default: ""
     },
 
-    idealAnswer : {
-        type : String,
-        default : ""
+    idealAnswer: {
+        type: String,
+        default: ""
     },
 
     feedback: {
@@ -32,9 +32,13 @@ const QuestionSchema = new mongoose.Schema({
         default: null
     },
 
-    audioURL : {
-        type : String,
-        default : null
+    audio: {
+        url: {
+            type: String
+        },
+        publicId: {
+            type: String
+        }
     }
 });
 

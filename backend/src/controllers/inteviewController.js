@@ -65,11 +65,29 @@ export const createInterview = asyncHandler(async (req, res) => {
         questionIds.push(question._id);
     }
 
-    for (const qId of questionIds) {
-        const question = await Question.findById(qId);
-        const audioURL = await generateQuestionAudio(question.question);
+    // for (const qId of questionIds) {
+    //     const question = await Question.findById(qId);
+    //     const audioURL = await generateQuestionAudio(question.question);
 
-        question.audioURL = audioURL;
+    //     question.audioURL = audioURL;
+
+    //     await question.save();
+    // }
+
+    for (const qId of questionIds) {
+
+        const question = await Question.findById(qId);
+
+        if (!question) {
+            continue;
+        }
+
+        const audio = await generateQuestionAudio(question.question);
+
+        question.audio = {
+            url: audio.url,
+            publicId: audio.publicId
+        };
 
         await question.save();
     }
@@ -238,7 +256,7 @@ export const skipCurrentQuestion = asyncHandler(async (req, res) => {
     if (!interview) {
         return res.status(404).json({ message: "Interview not found" });
     }
-    
+
     const currentQuestionsIndex = interview.currentQuestionsIndex++;
     await interview.save();
     if (
@@ -321,16 +339,16 @@ export const submitAnswer = asyncHandler(async (req, res) => {
     await question.save();
 
     interview.currentQuestionsIndex++;
-    
+
     await interview.save();
-    
+
     if (
         interview.currentQuestionsIndex >=
         interview.questions.length
     ) {
         interview.status = "completed";
         interview.endedAt = new Date(Date.now()).toISOString();
-        
+
         await interview.save();
         return res.status(200).json({
             success: true,
@@ -401,7 +419,7 @@ export const finishInterview = asyncHandler(async (req, res) => {
         }
     }
 
-    console.log("This is overall score",overallScore);
+    console.log("This is overall score", overallScore);
     console.log("This is total score", totalQuestions * 10);
     console.log((overallScore / (totalQuestions * 10)))
     // overallScore = Math.round((overallScore / totalScore) * 100);
