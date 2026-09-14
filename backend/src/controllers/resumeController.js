@@ -5,6 +5,52 @@ import normalizeResume from "../services/resumeNormalizationService.js";
 import extractCandidateFeatures from "../services/candidateFeatureService.js";
 
 
+// export const uploadResume = asyncHandler(async (req, res) => {
+
+//     if (!req.file) {
+//         return res.status(400).json({
+//             success: false,
+//             message: "Resume file is required"
+//         });
+//     }
+
+//     const resumeText = await extractResumeText(req.file.path);
+//     console.log(resumeText);
+
+//     const parsedData = await parseResumeWithAI(resumeText);
+
+//     const normalizedResume = normalizeResume(parsedData);
+
+//     const candidateFeatures =
+//     extractCandidateFeatures(normalizedResume);
+
+//     console.log(candidateFeatures);
+
+//     const analysis = await analyzeResumeWithAI(parsedData);
+
+//     const resume = await Resume.create({
+//         user: req.user.id,
+
+//         originalFile: {
+//             filename: req.file.originalname,
+//             path: req.file.path
+//         },
+
+//         rawText: resumeText,
+
+//         parsedData,
+
+//         analysis
+//     });
+
+//     return res.status(201).json({
+//         success: true,
+//         message: "Resume uploaded successfully",
+//         resume
+//     });
+// });
+
+
 export const uploadResume = asyncHandler(async (req, res) => {
 
     if (!req.file) {
@@ -14,26 +60,42 @@ export const uploadResume = asyncHandler(async (req, res) => {
         });
     }
 
-    const resumeText = await extractResumeText(req.file.path);
+    // 1. Extract text directly from the uploaded PDF buffer
+    const resumeText = await extractResumeText(req.file.buffer);
+
     console.log(resumeText);
 
+    // 2. Upload PDF to Cloudinary
+    const cloudinaryResult = await uploadToCloudinary(
+        req.file.buffer,
+        {
+            resource_type: "raw",
+            folder: "resumes",
+            public_id: `resume-${req.user.id}-${Date.now()}`
+        }
+    );
+
+    // 3. Parse resume
     const parsedData = await parseResumeWithAI(resumeText);
 
     const normalizedResume = normalizeResume(parsedData);
 
     const candidateFeatures =
-    extractCandidateFeatures(normalizedResume);
+        extractCandidateFeatures(normalizedResume);
 
     console.log(candidateFeatures);
 
+    // 4. Analyze resume
     const analysis = await analyzeResumeWithAI(parsedData);
 
+    // 5. Save everything to MongoDB
     const resume = await Resume.create({
         user: req.user.id,
 
         originalFile: {
             filename: req.file.originalname,
-            path: req.file.path
+            url: cloudinaryResult.secure_url,
+            publicId: cloudinaryResult.public_id
         },
 
         rawText: resumeText,
