@@ -3,9 +3,22 @@ import { PDFParse } from "pdf-parse";
 import ollama from "ollama";
 import groq from "../config/groq.js";
 
-export const extractResumeText = async (filePath) => {
+// export const extractResumeText = async (filePath) => {
 
-    const buffer = fs.readFileSync(filePath);
+//     const buffer = fs.readFileSync(filePath);
+
+//     const parser = new PDFParse({
+//         data: buffer
+//     });
+
+//     const result = await parser.getText();
+
+//     await parser.destroy();
+
+//     return result.text;
+// };
+
+export const extractResumeText = async (buffer) => {
 
     const parser = new PDFParse({
         data: buffer
