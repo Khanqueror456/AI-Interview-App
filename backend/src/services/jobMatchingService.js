@@ -12,6 +12,9 @@ const calculateJobMatch = async (candidateFeatures, jobFeatures) => {
         experienceRequired: job.experienceRequired
     }));
 
+    // console.log("Jobs for llm", jobsForLLM);
+    // console.log(candidateFeatures);
+
     const prompt = `You are an AI job matching engine.
 
 Compare the candidate profile against every provided job.
@@ -216,12 +219,15 @@ ${JSON.stringify(jobsForLLM, null, 2)}
                 role: "user",
                 content: prompt
             }
-        ]
+        ],
+        max_completion_tokens: 4000
     });
 
     const text = response.choices[0].message.content;
 
     const result = JSON.parse(text);
+
+    // console.log("The result from jobMatchingService.js is", result);
 
     /*
      * Construct the final result using YOUR original job data.

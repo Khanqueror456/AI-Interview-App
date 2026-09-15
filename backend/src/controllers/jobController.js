@@ -34,23 +34,26 @@ export const searchAndMatchJobs = asyncHandler(async (req, res) => {
         resultsPerPage: 10
     });
 
-    console.log(response.results);
-    console.log("---------------------------------------------------------------------------------------");
+    // console.log(response.results);
+    // console.log("---------------------------------------------------------------------------------------");
     const jobs = await normalizeJobs(response.results);
-    console.log(jobs);
-    console.log("---------------------------------------------------------------------------------------");
+    // console.log(jobs);
+    // console.log("---------------------------------------------------------------------------------------");
 
     const jobsFeatures = [];
     for (const job of jobs) {
-        const jobFeatures = await extractJobFeatures(job);
-        console.log(jobFeatures);
+        const jobFeatures =  extractJobFeatures(job);
+        // console.log(jobFeatures);
         jobsFeatures.push(jobFeatures);
 
     }
 
+    // console.log("Candiate Features\n", candidateFeatures);
+    // console.log("Jobs Features\n", jobsFeatures);
+
     const result = await calculateJobMatch(candidateFeatures, jobsFeatures);
 
-    console.log(result);
+    // console.log(result);
 
     const jobMatches = await JobMatch.create({
         resumeId: resumeId,
