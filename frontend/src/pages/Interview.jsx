@@ -671,6 +671,7 @@ const Interview = () => {
 
             <div className="flex items-center justify-center gap-3">
 
+              {console.log("Audio url", interview?.questions?.[currentIndex]?.audio?.url)}
               <AudioPlayer audioUrl={interview?.questions?.[currentIndex]?.audio?.url} />
 
               {/* Mic controls */}
